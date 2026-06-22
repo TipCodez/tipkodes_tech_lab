@@ -1,0 +1,18 @@
+<form class="reaction-panel" method="post" action="{% url 'react_to_content' %}">
+  {% csrf_token %}
+  <input type="hidden" name="model" value="{{ reaction_model }}">
+  <input type="hidden" name="object_id" value="{{ reaction_object.id }}">
+  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+  <button type="submit" name="reaction_type" value="like" title="Like this">
+    <i class="bi bi-hand-thumbs-up"></i>
+    <span>{{ reaction_summary.like|default:0 }}</span>
+  </button>
+  <button type="submit" name="reaction_type" value="insightful" title="Mark as insightful">
+    <i class="bi bi-lightbulb"></i>
+    <span>{{ reaction_summary.insightful|default:0 }}</span>
+  </button>
+  <button type="submit" name="reaction_type" value="inspired" title="Mark as inspiring">
+    <i class="bi bi-stars"></i>
+    <span>{{ reaction_summary.inspired|default:0 }}</span>
+  </button>
+</form>

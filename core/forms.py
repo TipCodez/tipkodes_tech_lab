@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import BlogComment, ContactMessage
+from .models import BlogComment, ContactMessage, NewsletterSubscription
 
 
 class ContactForm(forms.ModelForm):
@@ -36,3 +36,13 @@ class BlogCommentForm(forms.ModelForm):
         if len(comment) < 10:
             raise forms.ValidationError("Please enter at least 10 characters.")
         return comment
+
+
+class NewsletterSubscriptionForm(forms.ModelForm):
+    class Meta:
+        model = NewsletterSubscription
+        fields = ["name", "email"]
+        widgets = {
+            "name": forms.TextInput(attrs={"placeholder": "Your name"}),
+            "email": forms.EmailInput(attrs={"placeholder": "you@example.com"}),
+        }

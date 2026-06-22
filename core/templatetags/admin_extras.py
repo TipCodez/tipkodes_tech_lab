@@ -9,8 +9,11 @@ from core.models import (
     ContactMessage,
     CyberFinding,
     GalleryImage,
+    NewsletterSubscription,
+    PageView,
     Project,
     PythonPost,
+    Reaction,
     Skill,
     Video,
 )
@@ -36,4 +39,7 @@ def dashboard_stats():
         "unread_messages": ContactMessage.objects.filter(is_read=False).count(),
         "pending_comments": BlogComment.objects.filter(is_approved=False).count(),
         "approved_comments": BlogComment.objects.filter(is_approved=True).count(),
+        "subscribers": NewsletterSubscription.objects.filter(is_active=True).count(),
+        "page_views": PageView.objects.count(),
+        "reactions": Reaction.objects.count(),
     }

@@ -1,10 +1,46 @@
 {% extends "base.html" %}
+{% load core_extras %}
 {% block title %}Search | TIPKODES TECH LAB{% endblock %}
 {% block content %}
 {% include "page_header.html" with page_title="Search Results" page_subtitle="Global search across projects, blog posts, findings, videos, certificates, gallery, Python, and cloud." %}
 <section class="section-pad"><div class="container narrow">
-  <form class="filter-bar" method="get"><input name="q" value="{{ query }}" placeholder="Search the lab"><button class="btn btn-lab" type="submit"><i class="bi bi-search"></i> Search</button></form>
-  <div class="stack-list">{% for item in items %}<a href="{% if item.get_absolute_url %}{{ item.get_absolute_url }}{% else %}#{% endif %}"><span>{{ item.model_name|default:item.category.name|default:"Result" }}</span><strong>{{ item.title }}</strong></a>{% empty %}<div class="empty-state">No results found.</div>{% endfor %}</div>
+  <form class="filter-bar advanced-search" method="get">
+    <input name="q" value="{{ query }}" placeholder="Search the lab">
+    <select name="type">
+      <option value="all" {% if selected_type == "all" %}selected{% endif %}>All types</option>
+      <option value="project" {% if selected_type == "project" %}selected{% endif %}>Projects</option>
+      <option value="blog" {% if selected_type == "blog" %}selected{% endif %}>Blog</option>
+      <option value="finding" {% if selected_type == "finding" %}selected{% endif %}>Findings</option>
+      <option value="video" {% if selected_type == "video" %}selected{% endif %}>Videos</option>
+      <option value="certificate" {% if selected_type == "certificate" %}selected{% endif %}>Certificates</option>
+      <option value="gallery" {% if selected_type == "gallery" %}selected{% endif %}>Gallery</option>
+      <option value="python" {% if selected_type == "python" %}selected{% endif %}>Python</option>
+      <option value="cloud" {% if selected_type == "cloud" %}selected{% endif %}>Cloud</option>
+    </select>
+    <input type="date" name="from" value="{{ date_from }}">
+    <input type="date" name="to" value="{{ date_to }}">
+    <select name="sort">
+      <option value="newest" {% if selected_sort == "newest" %}selected{% endif %}>Newest</option>
+      <option value="oldest" {% if selected_sort == "oldest" %}selected{% endif %}>Oldest</option>
+      <option value="title" {% if selected_sort == "title" %}selected{% endif %}>Title</option>
+    </select>
+    <button class="btn btn-lab" type="submit"><i class="bi bi-search"></i> Search</button>
+  </form>
+  <div class="analytics-strip">
+    <span><strong>{{ analytics.total_page_views }}</strong> tracked page views</span>
+    {% for path in analytics.popular_paths %}<span>{{ path.path }}: {{ path.total }}</span>{% endfor %}
+  </div>
+  <div class="stack-list search-list">
+    {% for row in items %}
+      <a href="{{ row.url }}">
+        <span>{{ row.type }} · {{ row.date }}</span>
+        <strong>{{ row.title|highlight:query }}</strong>
+        <small>{{ row.snippet|truncatewords:24|highlight:query }}</small>
+      </a>
+    {% empty %}
+      <div class="empty-state">No results found.</div>
+    {% endfor %}
+  </div>
   {% include "pagination.html" %}
 </div></section>
 {% endblock %}

@@ -2,5 +2,5 @@
 {% block title %}{{ video.title }} | TIPKODES TECH LAB{% endblock %}
 {% block content %}
 <section class="detail-hero"><div class="container"><h1>{{ video.title }}</h1><p>{{ video.description }}</p></div></section>
-<section class="section-pad"><div class="container narrow"><div class="video-embed"><iframe src="{{ video.youtube_embed_url }}" title="{{ video.title }}" allowfullscreen></iframe></div></div></section>
+<section class="section-pad"><div class="container narrow"><div class="video-embed"><iframe src="{{ video.youtube_embed_url }}" title="{{ video.title }}" allowfullscreen></iframe></div>{% include "reaction_panel.html" with reaction_model="video" reaction_object=video reaction_summary=reaction_summary %}</div></section>
 {% endblock %}

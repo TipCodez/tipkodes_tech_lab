@@ -32,6 +32,7 @@
   </div>
 </article>
 {% elif card_type == "certificate" %}
+{% reaction_summary_for item as cert_reactions %}
 <article class="lab-card h-100 reveal">
   <div class="media-frame">{% if item.certificate_image %}<img src="{{ item.certificate_image.url }}" alt="{{ item.title }}">{% else %}<div class="placeholder-visual"><i class="bi bi-award"></i></div>{% endif %}</div>
   <div class="card-body">
@@ -39,6 +40,7 @@
     <h3>{{ item.title }}</h3>
     <p>{{ item.issuing_organization }}</p>
     {% if item.certificate_pdf %}<a class="card-link" href="{{ item.certificate_pdf.url }}">Download PDF <i class="bi bi-download"></i></a>{% endif %}
+    {% include "reaction_panel.html" with reaction_model="certificate" reaction_object=item reaction_summary=cert_reactions %}
   </div>
 </article>
 {% elif card_type == "video" %}

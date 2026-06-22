@@ -1,11 +1,15 @@
 from itertools import chain
 
 from django.contrib import messages
+from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
+from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.utils.dateparse import parse_date
 
-from .forms import BlogCommentForm, ContactForm
+from .forms import BlogCommentForm, ContactForm, NewsletterSubscriptionForm
 from .models import (
     BlogPost,
     CareerTrack,
@@ -14,9 +18,12 @@ from .models import (
     CloudPost,
     CyberFinding,
     GalleryImage,
+    NewsletterSubscription,
+    PageView,
     Profile,
     Project,
     PythonPost,
+    Reaction,
     Resume,
     Skill,
     Video,
@@ -44,6 +51,33 @@ def page_context(title, subtitle, queryset=None, categories=None):
     }
 
 
+def get_client_ip(request):
+    forwarded = request.META.get("HTTP_X_FORWARDED_FOR")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.META.get("REMOTE_ADDR")
+
+
+def get_reaction_summary(obj):
+    content_type = ContentType.objects.get_for_model(obj)
+    counts = Reaction.objects.filter(content_type=content_type, object_id=obj.pk).values("reaction_type").annotate(total=Count("id"))
+    summary = {choice: 0 for choice, _label in Reaction.ReactionType.choices}
+    for row in counts:
+        summary[row["reaction_type"]] = row["total"]
+    return summary
+
+
+def build_search_result(item, result_type, title, snippet, url, date):
+    return {
+        "item": item,
+        "type": result_type,
+        "title": title,
+        "snippet": snippet,
+        "url": url,
+        "date": date,
+    }
+
+
 def home(request):
     stats = {
         "projects": Project.objects.count(),
@@ -65,6 +99,7 @@ def home(request):
             "featured_certificates": Certificate.objects.filter(featured=True)[:4],
             "skills_preview": Skill.objects.select_related("category")[:10],
             "stats": stats,
+            "newsletter_form": NewsletterSubscriptionForm(),
         },
     )
 
@@ -122,7 +157,7 @@ def projects(request):
 def project_detail(request, slug):
     project = get_object_or_404(Project.objects.select_related("category", "career_track"), slug=slug)
     related_blogs = BlogPost.objects.filter(status=BlogPost.Status.PUBLISHED).filter(Q(full_content__icontains=project.title) | Q(short_excerpt__icontains=project.title))[:4]
-    return render(request, "project_detail.html", {"project": project, "related_blogs": related_blogs})
+    return render(request, "project_detail.html", {"project": project, "related_blogs": related_blogs, "reaction_summary": get_reaction_summary(project)})
 
 
 def findings(request):
@@ -198,6 +233,7 @@ def blog_detail(request, slug):
             "related_posts": related,
             "comment_form": comment_form,
             "comments": post.comments.filter(is_approved=True),
+            "reaction_summary": get_reaction_summary(post),
         },
     )
 
@@ -219,7 +255,8 @@ def videos(request):
 
 
 def video_detail(request, slug):
-    return render(request, "video_detail.html", {"video": get_object_or_404(Video, slug=slug)})
+    video = get_object_or_404(Video, slug=slug)
+    return render(request, "video_detail.html", {"video": video, "reaction_summary": get_reaction_summary(video)})
 
 
 def certificates(request):
@@ -252,23 +289,139 @@ def contact(request):
     return render(request, "contact.html", {"form": form, "profile": Profile.objects.first()})
 
 
+def subscribe_newsletter(request):
+    if request.method != "POST":
+        return HttpResponseBadRequest("Newsletter subscription requires POST.")
+    form = NewsletterSubscriptionForm(request.POST)
+    if form.is_valid():
+        subscription, created = NewsletterSubscription.objects.update_or_create(
+            email=form.cleaned_data["email"],
+            defaults={
+                "name": form.cleaned_data.get("name", ""),
+                "is_active": True,
+                "source": request.POST.get("source", "website")[:120],
+            },
+        )
+        if created:
+            messages.success(request, "You are subscribed to TIPKODES TECH LAB updates.")
+        else:
+            messages.info(request, "Your newsletter subscription is active.")
+    else:
+        messages.error(request, "Please enter a valid email address.")
+    return redirect(request.POST.get("next") or reverse("home"))
+
+
+def react_to_content(request):
+    if request.method != "POST":
+        return HttpResponseBadRequest("Reactions require POST.")
+
+    model_map = {
+        "project": Project,
+        "blog": BlogPost,
+        "video": Video,
+        "certificate": Certificate,
+    }
+    model_name = request.POST.get("model")
+    reaction_type = request.POST.get("reaction_type")
+    object_id = request.POST.get("object_id")
+    model = model_map.get(model_name)
+    valid_reactions = {choice for choice, _label in Reaction.ReactionType.choices}
+
+    if not model or reaction_type not in valid_reactions or not object_id:
+        return HttpResponseBadRequest("Invalid reaction.")
+
+    obj = get_object_or_404(model, pk=object_id)
+    if not request.session.session_key:
+        request.session.create()
+    Reaction.objects.get_or_create(
+        content_type=ContentType.objects.get_for_model(obj),
+        object_id=obj.pk,
+        reaction_type=reaction_type,
+        session_key=request.session.session_key,
+        defaults={"ip_address": get_client_ip(request)},
+    )
+    messages.success(request, "Reaction saved.")
+    return redirect(request.POST.get("next") or getattr(obj, "get_absolute_url", lambda: reverse("home"))())
+
+
 def search_results(request):
     q = request.GET.get("q", "").strip()
+    result_type = request.GET.get("type", "all")
+    sort = request.GET.get("sort", "newest")
+    date_from = parse_date(request.GET.get("from", "") or "")
+    date_to = parse_date(request.GET.get("to", "") or "")
     results = []
     if q:
-        results = list(
-            chain(
-                Project.objects.filter(Q(title__icontains=q) | Q(short_description__icontains=q)),
-                BlogPost.objects.filter(status=BlogPost.Status.PUBLISHED).filter(Q(title__icontains=q) | Q(short_excerpt__icontains=q)),
-                CyberFinding.objects.filter(is_public=True).filter(Q(title__icontains=q) | Q(short_summary__icontains=q)),
+        search_sets = [
+            (
+                "project",
+                Project.objects.filter(Q(title__icontains=q) | Q(short_description__icontains=q) | Q(full_description__icontains=q)),
+                lambda item: build_search_result(item, "Project", item.title, item.short_description, item.get_absolute_url(), item.created_at.date()),
+            ),
+            (
+                "blog",
+                BlogPost.objects.filter(status=BlogPost.Status.PUBLISHED).filter(Q(title__icontains=q) | Q(short_excerpt__icontains=q) | Q(full_content__icontains=q)),
+                lambda item: build_search_result(item, "Blog", item.title, item.short_excerpt, item.get_absolute_url(), (item.published_date or item.created_at).date()),
+            ),
+            (
+                "finding",
+                CyberFinding.objects.filter(is_public=True).filter(Q(title__icontains=q) | Q(short_summary__icontains=q) | Q(full_description__icontains=q)),
+                lambda item: build_search_result(item, "Finding", item.title, item.short_summary, item.get_absolute_url(), item.created_at.date()),
+            ),
+            (
+                "video",
                 Video.objects.filter(Q(title__icontains=q) | Q(description__icontains=q)),
-                Certificate.objects.filter(Q(title__icontains=q) | Q(description__icontains=q)),
+                lambda item: build_search_result(item, "Video", item.title, item.description, item.get_absolute_url(), item.created_at.date()),
+            ),
+            (
+                "certificate",
+                Certificate.objects.filter(Q(title__icontains=q) | Q(description__icontains=q) | Q(issuing_organization__icontains=q)),
+                lambda item: build_search_result(item, "Certificate", item.title, item.description or item.issuing_organization, reverse("certificates"), item.created_at.date()),
+            ),
+            (
+                "gallery",
                 GalleryImage.objects.filter(Q(title__icontains=q) | Q(description__icontains=q)),
+                lambda item: build_search_result(item, "Gallery", item.title, item.description, reverse("gallery"), item.created_at.date()),
+            ),
+            (
+                "python",
                 PythonPost.objects.filter(Q(title__icontains=q) | Q(description__icontains=q)),
-                CloudPost.objects.filter(Q(title__icontains=q) | Q(description__icontains=q)),
-            )
-        )
-    return render(request, "search_results.html", {"query": q, "items": paginate(request, results, 10)})
+                lambda item: build_search_result(item, "Python", item.title, item.description, reverse("python_career"), item.created_at.date()),
+            ),
+            (
+                "cloud",
+                CloudPost.objects.filter(Q(title__icontains=q) | Q(description__icontains=q) | Q(steps_notes__icontains=q)),
+                lambda item: build_search_result(item, "Cloud", item.title, item.description, reverse("cloud_computing"), item.created_at.date()),
+            ),
+        ]
+        for key, queryset, serializer in search_sets:
+            if result_type not in ("all", key):
+                continue
+            for item in queryset:
+                row = serializer(item)
+                if date_from and row["date"] < date_from:
+                    continue
+                if date_to and row["date"] > date_to:
+                    continue
+                results.append(row)
+        results.sort(key=lambda row: (row["title"].lower() if sort == "title" else row["date"]), reverse=(sort == "newest"))
+    analytics = {
+        "total_page_views": PageView.objects.count(),
+        "popular_paths": PageView.objects.values("path").annotate(total=Count("id")).order_by("-total")[:5],
+    }
+    return render(
+        request,
+        "search_results.html",
+        {
+            "query": q,
+            "selected_type": result_type,
+            "selected_sort": sort,
+            "date_from": request.GET.get("from", ""),
+            "date_to": request.GET.get("to", ""),
+            "items": paginate(request, results, 10),
+            "analytics": analytics,
+        },
+    )
 
 
 def custom_404(request, exception):

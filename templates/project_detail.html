@@ -12,6 +12,7 @@
       {% if project.live_demo_link %}<a class="btn btn-ghost" href="{{ project.live_demo_link }}" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right"></i> Live Demo</a>{% endif %}
       {% if project.pdf_documentation %}<a class="btn btn-ghost" href="{{ project.pdf_documentation.url }}"><i class="bi bi-download"></i> PDF Docs</a>{% endif %}
     </div>
+    {% include "reaction_panel.html" with reaction_model="project" reaction_object=project reaction_summary=reaction_summary %}
   </div>
 </section>
 <section class="section-pad">

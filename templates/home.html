@@ -104,4 +104,20 @@ mission = "build, document, grow"</code></pre>
     </div>
   </div>
 </section>
+<section class="section-pad alt-section">
+  <div class="container narrow">
+    <form class="newsletter-panel reveal" action="{% url 'subscribe_newsletter' %}" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.get_full_path }}">
+      <input type="hidden" name="source" value="home">
+      <div>
+        <p class="eyebrow">Newsletter</p>
+        <h2>Get new projects, findings, and tutorials.</h2>
+      </div>
+      <input type="text" name="name" placeholder="Your name">
+      <input type="email" name="email" placeholder="you@example.com" required>
+      <button class="btn btn-lab" type="submit"><i class="bi bi-envelope-plus"></i> Subscribe</button>
+    </form>
+  </div>
+</section>
 {% endblock %}

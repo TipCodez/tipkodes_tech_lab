@@ -1,4 +1,6 @@
 from django.db import models
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
 from django.utils.text import slugify
 
@@ -401,3 +403,51 @@ class ContactMessage(TimeStampedModel):
 
     def __str__(self):
         return f"{self.subject} from {self.name}"
+
+
+class NewsletterSubscription(TimeStampedModel):
+    email = models.EmailField(unique=True)
+    name = models.CharField(max_length=120, blank=True)
+    is_active = models.BooleanField(default=True)
+    source = models.CharField(max_length=120, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return self.email
+
+
+class PageView(TimeStampedModel):
+    path = models.CharField(max_length=260)
+    page_title = models.CharField(max_length=220, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(blank=True)
+    referrer = models.URLField(blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return self.path
+
+
+class Reaction(TimeStampedModel):
+    class ReactionType(models.TextChoices):
+        LIKE = "like", "Like"
+        INSIGHTFUL = "insightful", "Insightful"
+        INSPIRED = "inspired", "Inspired"
+
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey("content_type", "object_id")
+    reaction_type = models.CharField(max_length=20, choices=ReactionType.choices)
+    session_key = models.CharField(max_length=80)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ("content_type", "object_id", "reaction_type", "session_key")
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.get_reaction_type_display()} on {self.content_object}"

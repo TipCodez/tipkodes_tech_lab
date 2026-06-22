@@ -22,5 +22,7 @@ urlpatterns = [
     path("skills/", views.skills, name="skills"),
     path("resume/", views.resume, name="resume"),
     path("contact/", views.contact, name="contact"),
+    path("newsletter/subscribe/", views.subscribe_newsletter, name="subscribe_newsletter"),
+    path("react/", views.react_to_content, name="react_to_content"),
     path("search/", views.search_results, name="search_results"),
 ]

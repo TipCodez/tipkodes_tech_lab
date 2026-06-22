@@ -2,7 +2,7 @@
 {% block title %}{{ post.title }} | TIPKODES TECH LAB{% endblock %}
 {% block content %}
 <section class="detail-hero"><div class="container"><span class="status-badge">{{ post.category.name|default:"Blog" }}</span><h1>{{ post.title }}</h1><p>{{ post.short_excerpt }}</p><div class="meta-row wide"><span>{{ post.author }}</span><span>{{ post.published_date|date:"M d, Y" }}</span><span>{{ post.reading_time }} min read</span></div></div></section>
-<section class="section-pad"><div class="container narrow"><article class="article-body">{{ post.full_content|linebreaks }}</article><div class="share-row"><span>Share</span><a href="https://www.linkedin.com/shareArticle?mini=true&url={{ request.build_absolute_uri }}" target="_blank" rel="noopener">LinkedIn</a><a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}" target="_blank" rel="noopener">X</a></div></div></section>
+<section class="section-pad"><div class="container narrow"><article class="article-body">{{ post.full_content|linebreaks }}</article>{% include "reaction_panel.html" with reaction_model="blog" reaction_object=post reaction_summary=reaction_summary %}<div class="share-row"><span>Share</span><a href="https://www.linkedin.com/shareArticle?mini=true&url={{ request.build_absolute_uri }}" target="_blank" rel="noopener">LinkedIn</a><a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}" target="_blank" rel="noopener">X</a></div></div></section>
 <section class="section-pad alt-section">
   <div class="container narrow">
     <div class="section-heading compact">

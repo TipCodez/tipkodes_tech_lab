@@ -89,6 +89,14 @@
             <input type="search" name="q" placeholder="Search the lab" aria-label="Search the lab">
             <button type="submit"><i class="bi bi-search"></i></button>
           </form>
+          <form class="newsletter-form" action="{% url 'subscribe_newsletter' %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <input type="hidden" name="source" value="footer">
+            <input type="text" name="name" placeholder="Name">
+            <input type="email" name="email" placeholder="Email updates" required>
+            <button type="submit"><i class="bi bi-envelope-plus"></i></button>
+          </form>
         </div>
       </div>
       <div class="footer-bottom">Built with Django, Bootstrap 5, and a cybersecurity-aware content system.</div>

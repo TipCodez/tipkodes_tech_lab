@@ -10,10 +10,13 @@ from .models import (
     ContactMessage,
     CyberFinding,
     GalleryImage,
+    NewsletterSubscription,
+    PageView,
     Profile,
     Project,
     ProjectImage,
     PythonPost,
+    Reaction,
     Resume,
     Skill,
     Tag,
@@ -194,3 +197,27 @@ class ContactMessageAdmin(admin.ModelAdmin):
     search_fields = ("name", "email", "subject", "message")
     readonly_fields = ("name", "email", "subject", "message", "created_at", "updated_at")
     actions = [mark_as_read]
+
+
+@admin.register(NewsletterSubscription)
+class NewsletterSubscriptionAdmin(admin.ModelAdmin):
+    list_display = ("email", "name", "is_active", "source", "created_at")
+    list_filter = ("is_active", "source", "created_at")
+    search_fields = ("email", "name")
+    readonly_fields = ("created_at", "updated_at")
+
+
+@admin.register(PageView)
+class PageViewAdmin(admin.ModelAdmin):
+    list_display = ("path", "ip_address", "created_at")
+    list_filter = ("created_at", "path")
+    search_fields = ("path", "user_agent", "referrer")
+    readonly_fields = ("path", "page_title", "ip_address", "user_agent", "referrer", "created_at", "updated_at")
+
+
+@admin.register(Reaction)
+class ReactionAdmin(admin.ModelAdmin):
+    list_display = ("content_object", "reaction_type", "session_key", "created_at")
+    list_filter = ("reaction_type", "created_at", "content_type")
+    search_fields = ("session_key",)
+    readonly_fields = ("content_type", "object_id", "reaction_type", "session_key", "ip_address", "created_at", "updated_at")
