@@ -8,12 +8,15 @@ from core.models import (
     Certificate,
     CloudPost,
     CyberFinding,
+    ExternalProfile,
     Profile,
     Project,
     PythonPost,
     Resume,
     Skill,
     Tag,
+    Testimonial,
+    TimelineEvent,
     Video,
 )
 
@@ -163,6 +166,37 @@ class Command(BaseCommand):
                 "credential_id": "TTL-SAMPLE-001",
                 "featured": True,
                 "related_career_track": security_track,
+            },
+        )
+
+        Testimonial.objects.get_or_create(
+            name="Sample Mentor",
+            defaults={
+                "role": "Technology Mentor",
+                "organization": "TIPKODES Network",
+                "quote": "TIPKODES TECH LAB shows consistent learning, practical curiosity, and a strong habit of documenting technical growth.",
+                "is_featured": True,
+            },
+        )
+
+        TimelineEvent.objects.get_or_create(
+            title="Started TIPKODES TECH LAB",
+            defaults={
+                "event_date": timezone.now().date(),
+                "category": "Portfolio",
+                "description": "Launched the Django-powered technology lab to document projects, cybersecurity findings, cloud learning, certificates, videos, and career growth.",
+                "icon": "bi bi-rocket-takeoff",
+            },
+        )
+
+        ExternalProfile.objects.get_or_create(
+            platform="github",
+            display_name="TIPKODES GitHub",
+            defaults={
+                "username": "TipCodez",
+                "profile_url": "https://github.com/TipCodez",
+                "headline": "Repositories, source code, and project history.",
+                "public_items": 1,
             },
         )
 

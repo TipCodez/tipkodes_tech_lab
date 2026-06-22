@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Integrations | TIPKODES TECH LAB{% endblock %}
+{% block content %}
+{% include "page_header.html" with page_title="GitHub and YouTube" page_subtitle="External platform profiles and manually synced public metrics." %}
+<section class="section-pad">
+  <div class="container">
+    <div class="row g-4">
+      {% for profile in profiles %}
+        <div class="col-md-6">
+          <article class="lab-card h-100 reveal">
+            <div class="card-body">
+              <div class="meta-row"><span>{{ profile.get_platform_display }}</span><span>{{ profile.username }}</span></div>
+              <h3>{{ profile.display_name }}</h3>
+              <p>{{ profile.headline|default:"Add profile summary from Django Admin." }}</p>
+              <div class="stats-grid compact-stats">
+                <div><strong>{{ profile.followers }}</strong><span>Followers</span></div>
+                <div><strong>{{ profile.public_items }}</strong><span>{% if profile.platform == "github" %}Repos{% else %}Videos{% endif %}</span></div>
+                <div><strong>{{ profile.total_views }}</strong><span>Views</span></div>
+              </div>
+              <a class="card-link" href="{{ profile.profile_url }}" target="_blank" rel="noopener">Open profile <i class="bi bi-arrow-right"></i></a>
+            </div>
+            {% if profile.embed_url %}
+              <div class="video-embed"><iframe src="{{ profile.embed_url }}" title="{{ profile.display_name }}" allowfullscreen></iframe></div>
+            {% endif %}
+          </article>
+        </div>
+      {% empty %}
+        <div class="col"><div class="empty-state">Add GitHub or YouTube profiles from Django Admin.</div></div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

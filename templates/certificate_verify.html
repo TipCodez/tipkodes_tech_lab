@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Verify Certificate | TIPKODES TECH LAB{% endblock %}
+{% block content %}
+{% include "page_header.html" with page_title="Certificate Verification" page_subtitle="Verify certificates and credentials by credential ID." %}
+<section class="section-pad">
+  <div class="container narrow">
+    <form class="filter-bar" method="get">
+      {{ form.credential_id }}
+      <button class="btn btn-lab" type="submit"><i class="bi bi-patch-check"></i> Verify</button>
+    </form>
+    {% if searched %}
+      {% if certificate %}
+        <div class="glass-card verification-card">
+          <span class="status-badge">Verified</span>
+          <h2>{{ certificate.title }}</h2>
+          <p>{{ certificate.description|default:"This credential exists in TIPKODES TECH LAB records." }}</p>
+          <dl>
+            <dt>Issued By</dt><dd>{{ certificate.issuing_organization }}</dd>
+            <dt>Credential ID</dt><dd>{{ certificate.credential_id }}</dd>
+            <dt>Date Issued</dt><dd>{{ certificate.date_issued|default:"Not set" }}</dd>
+            <dt>Expiry Date</dt><dd>{{ certificate.expiry_date|default:"No expiry recorded" }}</dd>
+          </dl>
+          <div class="hero-actions">
+            {% if certificate.verification_link %}<a class="btn btn-lab" href="{{ certificate.verification_link }}" target="_blank" rel="noopener">External Verification</a>{% endif %}
+            {% if certificate.certificate_pdf %}<a class="btn btn-ghost" href="{{ certificate.certificate_pdf.url }}">Download PDF</a>{% endif %}
+          </div>
+        </div>
+      {% else %}
+        <div class="empty-state">No certificate found for that credential ID.</div>
+      {% endif %}
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

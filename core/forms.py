@@ -46,3 +46,10 @@ class NewsletterSubscriptionForm(forms.ModelForm):
             "name": forms.TextInput(attrs={"placeholder": "Your name"}),
             "email": forms.EmailInput(attrs={"placeholder": "you@example.com"}),
         }
+
+
+class CertificateVerificationForm(forms.Form):
+    credential_id = forms.CharField(
+        max_length=120,
+        widget=forms.TextInput(attrs={"placeholder": "Enter credential ID"}),
+    )

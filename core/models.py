@@ -279,6 +279,61 @@ class Certificate(SluggedModel):
         ordering = ["-featured", "-date_issued", "-created_at"]
 
 
+class Testimonial(TimeStampedModel):
+    name = models.CharField(max_length=140)
+    role = models.CharField(max_length=160, blank=True)
+    organization = models.CharField(max_length=160, blank=True)
+    quote = models.TextField()
+    photo = models.ImageField(upload_to="testimonials/", blank=True, validators=[validate_image_file])
+    is_featured = models.BooleanField(default=False)
+    is_public = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["-is_featured", "-created_at"]
+
+    def __str__(self):
+        return self.name
+
+
+class TimelineEvent(TimeStampedModel):
+    title = models.CharField(max_length=180)
+    event_date = models.DateField()
+    category = models.CharField(max_length=80, blank=True)
+    description = models.TextField()
+    icon = models.CharField(max_length=80, blank=True)
+    link = models.URLField(blank=True)
+    is_public = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["-event_date", "-created_at"]
+
+    def __str__(self):
+        return self.title
+
+
+class ExternalProfile(TimeStampedModel):
+    class Platform(models.TextChoices):
+        GITHUB = "github", "GitHub"
+        YOUTUBE = "youtube", "YouTube"
+
+    platform = models.CharField(max_length=20, choices=Platform.choices)
+    display_name = models.CharField(max_length=140)
+    profile_url = models.URLField()
+    username = models.CharField(max_length=140, blank=True)
+    headline = models.CharField(max_length=220, blank=True)
+    followers = models.PositiveIntegerField(default=0)
+    public_items = models.PositiveIntegerField(default=0, help_text="Repos for GitHub, videos for YouTube.")
+    total_views = models.PositiveIntegerField(default=0)
+    embed_url = models.URLField(blank=True, help_text="Optional YouTube channel or featured playlist embed URL.")
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["platform", "display_name"]
+
+    def __str__(self):
+        return f"{self.get_platform_display()} - {self.display_name}"
+
+
 class Skill(TimeStampedModel):
     class Level(models.TextChoices):
         BEGINNER = "Beginner", "Beginner"

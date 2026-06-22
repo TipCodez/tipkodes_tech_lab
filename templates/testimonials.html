@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Testimonials | TIPKODES TECH LAB{% endblock %}
+{% block content %}
+{% include "page_header.html" with page_title="Testimonials" page_subtitle="Feedback, recommendations, and professional notes from people connected to the work." %}
+<section class="section-pad">
+  <div class="container">
+    <div class="testimonial-grid">
+      {% for item in items %}
+        <article class="testimonial-card reveal">
+          {% if item.photo %}<img src="{{ item.photo.url }}" alt="{{ item.name }}">{% endif %}
+          <p>{{ item.quote }}</p>
+          <h2>{{ item.name }}</h2>
+          <span>{{ item.role }}{% if item.organization %} · {{ item.organization }}{% endif %}</span>
+        </article>
+      {% empty %}
+        <div class="empty-state">Add public testimonials from Django Admin.</div>
+      {% endfor %}
+    </div>
+    {% include "pagination.html" %}
+  </div>
+</section>
+{% endblock %}

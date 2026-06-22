@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Deployment | TIPKODES TECH LAB{% endblock %}
+{% block content %}
+{% include "page_header.html" with page_title="System Architecture" page_subtitle="How TIPKODES TECH LAB is structured for development, security, content management, and deployment." %}
+<section class="section-pad">
+  <div class="container">
+    <div class="architecture-grid">
+      {% for title, description in stack %}
+        <article class="glass-card architecture-card reveal">
+          <h2>{{ title }}</h2>
+          <p>{{ description }}</p>
+        </article>
+      {% endfor %}
+    </div>
+    <div class="content-stack mt-4">
+      <section>
+        <h2>Production Checklist</h2>
+        <p>Set a strong SECRET_KEY, configure ALLOWED_HOSTS, connect PostgreSQL through DATABASE_URL, run collectstatic, enable HTTPS, configure SECURE_SSL_REDIRECT and HSTS after SSL is confirmed, and move media to Cloudinary or another durable object store.</p>
+      </section>
+      <section>
+        <h2>Deployment Targets</h2>
+        <p>The project is ready to adapt for Koyeb, Render, PythonAnywhere, VPS hosting, or any platform that supports Django, Gunicorn, PostgreSQL, environment variables, and static file serving.</p>
+      </section>
+    </div>
+  </div>
+</section>
+{% endblock %}

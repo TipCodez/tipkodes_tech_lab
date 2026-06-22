@@ -8,6 +8,7 @@ from core.models import (
     CloudPost,
     ContactMessage,
     CyberFinding,
+    ExternalProfile,
     GalleryImage,
     NewsletterSubscription,
     PageView,
@@ -15,6 +16,8 @@ from core.models import (
     PythonPost,
     Reaction,
     Skill,
+    Testimonial,
+    TimelineEvent,
     Video,
 )
 
@@ -42,4 +45,7 @@ def dashboard_stats():
         "subscribers": NewsletterSubscription.objects.filter(is_active=True).count(),
         "page_views": PageView.objects.count(),
         "reactions": Reaction.objects.count(),
+        "testimonials": Testimonial.objects.filter(is_public=True).count(),
+        "timeline_events": TimelineEvent.objects.filter(is_public=True).count(),
+        "external_profiles": ExternalProfile.objects.filter(is_active=True).count(),
     }

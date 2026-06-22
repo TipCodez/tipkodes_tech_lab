@@ -347,6 +347,56 @@ h1, h2, h3 { letter-spacing: 0; }
 .share-row { display: flex; gap: 1rem; margin-top: 1rem; color: var(--muted); }
 .share-row a { color: var(--cyan); font-weight: 800; }
 
+.verification-card { padding: 1.4rem; }
+.verification-card h2 { margin: 0.8rem 0; font-weight: 900; }
+.verification-card p, .verification-card dd { color: var(--muted); }
+.testimonial-grid, .architecture-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+.testimonial-card, .architecture-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.3rem;
+}
+.testimonial-card img {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 1rem;
+}
+.testimonial-card p, .architecture-card p, .timeline-item p { color: var(--muted); line-height: 1.75; }
+.testimonial-card h2, .architecture-card h2, .timeline-item h2 { font-size: 1.2rem; font-weight: 900; margin: 0.8rem 0 0.25rem; }
+.testimonial-card span, .timeline-item span { color: var(--green); font-weight: 800; font-size: 0.9rem; }
+.timeline-list { position: relative; display: grid; gap: 1rem; }
+.timeline-item {
+  display: grid;
+  grid-template-columns: 3rem 1fr;
+  gap: 1rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1rem;
+}
+.timeline-icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  color: #03111f;
+  background: linear-gradient(135deg, var(--cyan), var(--green));
+}
+.compact-stats {
+  grid-template-columns: repeat(3, 1fr);
+  margin: 1rem 0;
+}
+.compact-stats div { padding: 0.9rem; }
+.compact-stats strong { font-size: 1.3rem; }
+
 .lab-pagination { display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: 2rem; }
 .lab-pagination a, .lab-pagination span {
   min-width: 2.6rem;
@@ -451,6 +501,7 @@ mark {
 @media (max-width: 1199px) {
   .stats-grid { grid-template-columns: repeat(3, 1fr); }
   .skill-grid, .gallery-grid { grid-template-columns: repeat(3, 1fr); }
+  .testimonial-grid, .architecture-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 991px) {
   .hero-section { min-height: auto; }
@@ -464,6 +515,7 @@ mark {
   .hero-section h1 { font-size: 3.2rem; }
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
   .skill-grid, .gallery-grid { grid-template-columns: 1fr; }
+  .testimonial-grid, .architecture-grid { grid-template-columns: 1fr; }
   .page-hero, .detail-hero { padding-top: 7rem; }
   .terminal-card { transform: none; }
 }

@@ -18,7 +18,17 @@ The project is admin-powered, responsive, animated, media-ready, and designed as
 - Skills grouped by category and linked to projects
 - Online resume/CV page with downloadable PDF
 - Contact form that saves messages in the database
+- Optional contact email notifications when SMTP environment variables are configured
 - Global search across projects, blogs, findings, videos, certificates, gallery, Python, and cloud posts
+- Advanced search with type, date range, sorting, and highlighted terms
+- Newsletter subscriptions
+- Page-view analytics
+- Content reactions
+- Generated project report PDF downloads
+- Certificate verification by credential ID
+- Testimonials and learning timeline pages
+- GitHub and YouTube profile integration records
+- Deployment and system architecture page
 - Pagination, custom 404/500 pages, media upload validation, and production-ready environment variables
 
 ## Tech Stack

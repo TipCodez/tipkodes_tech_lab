@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Timeline | TIPKODES TECH LAB{% endblock %}
+{% block content %}
+{% include "page_header.html" with page_title="Learning Timeline" page_subtitle="A chronological view of projects, certificates, milestones, and technical growth." %}
+<section class="section-pad">
+  <div class="container narrow">
+    <div class="timeline-list">
+      {% for item in items %}
+        <article class="timeline-item reveal">
+          <div class="timeline-icon"><i class="{{ item.icon|default:'bi bi-lightning-charge' }}"></i></div>
+          <div>
+            <span>{{ item.event_date|date:"M d, Y" }}{% if item.category %} · {{ item.category }}{% endif %}</span>
+            <h2>{{ item.title }}</h2>
+            <p>{{ item.description }}</p>
+            {% if item.link %}<a class="card-link" href="{{ item.link }}" target="_blank" rel="noopener">Open link <i class="bi bi-arrow-right"></i></a>{% endif %}
+          </div>
+        </article>
+      {% empty %}
+        <div class="empty-state">Add public timeline events from Django Admin.</div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -9,6 +9,7 @@ from .models import (
     CloudPost,
     ContactMessage,
     CyberFinding,
+    ExternalProfile,
     GalleryImage,
     NewsletterSubscription,
     PageView,
@@ -20,6 +21,8 @@ from .models import (
     Resume,
     Skill,
     Tag,
+    Testimonial,
+    TimelineEvent,
     Video,
 )
 
@@ -149,6 +152,30 @@ class CertificateAdmin(admin.ModelAdmin):
     list_filter = ("category", "featured", "issuing_organization")
     search_fields = ("title", "issuing_organization", "description", "credential_id")
     prepopulated_fields = {"slug": ("title",)}
+    readonly_fields = ("created_at", "updated_at")
+
+
+@admin.register(Testimonial)
+class TestimonialAdmin(admin.ModelAdmin):
+    list_display = ("name", "role", "organization", "is_featured", "is_public", "created_at")
+    list_filter = ("is_featured", "is_public", "created_at")
+    search_fields = ("name", "role", "organization", "quote")
+    readonly_fields = ("created_at", "updated_at")
+
+
+@admin.register(TimelineEvent)
+class TimelineEventAdmin(admin.ModelAdmin):
+    list_display = ("title", "event_date", "category", "is_public")
+    list_filter = ("category", "is_public", "event_date")
+    search_fields = ("title", "description", "category")
+    readonly_fields = ("created_at", "updated_at")
+
+
+@admin.register(ExternalProfile)
+class ExternalProfileAdmin(admin.ModelAdmin):
+    list_display = ("display_name", "platform", "username", "followers", "public_items", "total_views", "is_active")
+    list_filter = ("platform", "is_active")
+    search_fields = ("display_name", "username", "headline", "profile_url")
     readonly_fields = ("created_at", "updated_at")
 
 

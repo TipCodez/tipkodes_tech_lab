@@ -79,6 +79,9 @@
     <div class="ttl-stat"><strong>{{ stats.subscribers }}</strong><span>Subscribers</span></div>
     <div class="ttl-stat"><strong>{{ stats.page_views }}</strong><span>Page Views</span></div>
     <div class="ttl-stat"><strong>{{ stats.reactions }}</strong><span>Reactions</span></div>
+    <div class="ttl-stat"><strong>{{ stats.testimonials }}</strong><span>Testimonials</span></div>
+    <div class="ttl-stat"><strong>{{ stats.timeline_events }}</strong><span>Timeline Events</span></div>
+    <div class="ttl-stat"><strong>{{ stats.external_profiles }}</strong><span>Integrations</span></div>
     <div class="ttl-stat"><strong>{{ stats.certificates }}</strong><span>Certificates</span></div>
     <div class="ttl-stat"><strong>{{ stats.skills }}</strong><span>Skills</span></div>
     <div class="ttl-stat"><strong>{{ stats.videos }}</strong><span>Videos</span></div>
@@ -87,6 +90,8 @@
     <a href="{% url 'admin:core_project_add' %}">Add Project</a>
     <a href="{% url 'admin:core_blogpost_add' %}">Write Blog</a>
     <a href="{% url 'admin:core_cyberfinding_add' %}">Add Finding</a>
+    <a href="{% url 'admin:core_timelineevent_add' %}">Add Timeline Event</a>
+    <a href="{% url 'admin:core_testimonial_add' %}">Add Testimonial</a>
     <a href="{% url 'admin:core_blogcomment_changelist' %}?is_approved__exact=0">Review Comments</a>
     <a href="{% url 'admin:core_contactmessage_changelist' %}?is_read__exact=0">Unread Messages</a>
   </div>

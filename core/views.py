@@ -1,15 +1,17 @@
 from itertools import chain
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator
+from django.core.mail import send_mail
 from django.db.models import Count, Q
-from django.http import HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.dateparse import parse_date
 
-from .forms import BlogCommentForm, ContactForm, NewsletterSubscriptionForm
+from .forms import BlogCommentForm, CertificateVerificationForm, ContactForm, NewsletterSubscriptionForm
 from .models import (
     BlogPost,
     CareerTrack,
@@ -17,6 +19,7 @@ from .models import (
     Certificate,
     CloudPost,
     CyberFinding,
+    ExternalProfile,
     GalleryImage,
     NewsletterSubscription,
     PageView,
@@ -26,6 +29,8 @@ from .models import (
     Reaction,
     Resume,
     Skill,
+    Testimonial,
+    TimelineEvent,
     Video,
 )
 
@@ -76,6 +81,41 @@ def build_search_result(item, result_type, title, snippet, url, date):
         "url": url,
         "date": date,
     }
+
+
+def simple_pdf_response(filename, title, lines):
+    def pdf_escape(value):
+        return str(value).replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
+
+    content_lines = [title, ""] + [line for line in lines if line is not None]
+    text_ops = ["BT", "/F1 12 Tf", "72 760 Td", "18 TL"]
+    for line in content_lines[:36]:
+        text_ops.append(f"({pdf_escape(line)[:95]}) Tj")
+        text_ops.append("T*")
+    text_ops.append("ET")
+    stream = "\n".join(text_ops).encode("latin-1", "replace")
+    objects = [
+        b"<< /Type /Catalog /Pages 2 0 R >>",
+        b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+        b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
+        b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+        b"<< /Length " + str(len(stream)).encode() + b" >>\nstream\n" + stream + b"\nendstream",
+    ]
+    pdf = bytearray(b"%PDF-1.4\n")
+    offsets = [0]
+    for index, obj in enumerate(objects, start=1):
+        offsets.append(len(pdf))
+        pdf.extend(f"{index} 0 obj\n".encode())
+        pdf.extend(obj)
+        pdf.extend(b"\nendobj\n")
+    xref = len(pdf)
+    pdf.extend(f"xref\n0 {len(objects) + 1}\n0000000000 65535 f \n".encode())
+    for offset in offsets[1:]:
+        pdf.extend(f"{offset:010d} 00000 n \n".encode())
+    pdf.extend(f"trailer << /Size {len(objects) + 1} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF".encode())
+    response = HttpResponse(bytes(pdf), content_type="application/pdf")
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response
 
 
 def home(request):
@@ -158,6 +198,26 @@ def project_detail(request, slug):
     project = get_object_or_404(Project.objects.select_related("category", "career_track"), slug=slug)
     related_blogs = BlogPost.objects.filter(status=BlogPost.Status.PUBLISHED).filter(Q(full_content__icontains=project.title) | Q(short_excerpt__icontains=project.title))[:4]
     return render(request, "project_detail.html", {"project": project, "related_blogs": related_blogs, "reaction_summary": get_reaction_summary(project)})
+
+
+def project_report(request, slug):
+    project = get_object_or_404(Project.objects.select_related("category", "career_track"), slug=slug)
+    lines = [
+        f"Status: {project.status}",
+        f"Category: {project.category.name if project.category else 'Not set'}",
+        f"Career Track: {project.career_track.title if project.career_track else 'Not linked'}",
+        f"Technologies: {project.technologies_used or 'Not set'}",
+        "",
+        "Short Description:",
+        project.short_description,
+        "",
+        "Problem Solved:",
+        project.problem_solved or "Not provided.",
+        "",
+        "Key Features:",
+        project.key_features or "Not provided.",
+    ]
+    return simple_pdf_response(f"{project.slug}-report.pdf", f"TIPKODES TECH LAB Project Report: {project.title}", lines)
 
 
 def findings(request):
@@ -267,6 +327,17 @@ def certificates(request):
     return render(request, "certificates.html", {"items": paginate(request, qs, 12), "categories": Category.objects.filter(category_type=Category.CategoryType.CERTIFICATE)})
 
 
+def verify_certificate(request):
+    form = CertificateVerificationForm(request.GET or None)
+    certificate = None
+    searched = False
+    if form.is_valid():
+        searched = True
+        credential_id = form.cleaned_data["credential_id"].strip()
+        certificate = Certificate.objects.filter(credential_id__iexact=credential_id).first()
+    return render(request, "certificate_verify.html", {"form": form, "certificate": certificate, "searched": searched})
+
+
 def skills(request):
     category = request.GET.get("category")
     qs = Skill.objects.select_related("category").prefetch_related("related_projects")
@@ -283,10 +354,45 @@ def resume(request):
 def contact(request):
     form = ContactForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
-        form.save()
+        message = form.save()
+        if getattr(settings, "EMAIL_HOST", "") and getattr(settings, "DEFAULT_FROM_EMAIL", ""):
+            send_mail(
+                subject=f"New TIPKODES TECH LAB message: {message.subject}",
+                message=f"From: {message.name} <{message.email}>\n\n{message.message}",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[settings.DEFAULT_FROM_EMAIL],
+                fail_silently=True,
+            )
         messages.success(request, "Your message has been saved. I will get back to you soon.")
         return redirect("contact")
     return render(request, "contact.html", {"form": form, "profile": Profile.objects.first()})
+
+
+def testimonials(request):
+    qs = Testimonial.objects.filter(is_public=True)
+    return render(request, "testimonials.html", {"items": paginate(request, qs, 9)})
+
+
+def timeline(request):
+    qs = TimelineEvent.objects.filter(is_public=True)
+    return render(request, "timeline.html", {"items": qs})
+
+
+def integrations(request):
+    profiles = ExternalProfile.objects.filter(is_active=True)
+    return render(request, "integrations.html", {"profiles": profiles})
+
+
+def deployment(request):
+    stack = [
+        ("Backend", "Django with SQLite development and PostgreSQL-ready DATABASE_URL."),
+        ("Frontend", "Bootstrap 5, custom CSS, JavaScript animations, responsive templates."),
+        ("Content", "Django Admin manages projects, findings, blogs, gallery, videos, certificates, skills, comments, testimonials, and timeline."),
+        ("Security", "CSRF protection, upload validators, environment secrets, secure-cookie production switches, and custom errors."),
+        ("Media", "Local media first with Cloudinary-ready environment variables."),
+        ("Deployment", "Whitenoise static files, Gunicorn, PostgreSQL driver, HTTPS/HSTS environment controls."),
+    ]
+    return render(request, "deployment.html", {"stack": stack})
 
 
 def subscribe_newsletter(request):
@@ -377,6 +483,16 @@ def search_results(request):
                 "certificate",
                 Certificate.objects.filter(Q(title__icontains=q) | Q(description__icontains=q) | Q(issuing_organization__icontains=q)),
                 lambda item: build_search_result(item, "Certificate", item.title, item.description or item.issuing_organization, reverse("certificates"), item.created_at.date()),
+            ),
+            (
+                "testimonial",
+                Testimonial.objects.filter(is_public=True).filter(Q(name__icontains=q) | Q(role__icontains=q) | Q(organization__icontains=q) | Q(quote__icontains=q)),
+                lambda item: build_search_result(item, "Testimonial", item.name, item.quote, reverse("testimonials"), item.created_at.date()),
+            ),
+            (
+                "timeline",
+                TimelineEvent.objects.filter(is_public=True).filter(Q(title__icontains=q) | Q(description__icontains=q) | Q(category__icontains=q)),
+                lambda item: build_search_result(item, "Timeline", item.title, item.description, reverse("timeline"), item.event_date),
             ),
             (
                 "gallery",
