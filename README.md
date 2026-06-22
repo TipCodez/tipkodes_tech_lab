@@ -86,6 +86,7 @@ Copy `.env.example` to `.env` for your deployment host and set:
 - `SECRET_KEY`
 - `DEBUG`
 - `USE_MANIFEST_STATIC` (`True` only after running `collectstatic` for production)
+- `ENABLE_NGROK` (`True` when testing through an ngrok public URL)
 - `ALLOWED_HOSTS`
 - `DATABASE_URL`
 - `EMAIL_HOST`
@@ -96,6 +97,18 @@ Copy `.env.example` to `.env` for your deployment host and set:
 - `SECURE_SSL_REDIRECT` and `SECURE_HSTS_SECONDS` for HTTPS-only production deployments
 
 The current settings read environment variables directly. For local development, defaults are provided so the project can run immediately after installing requirements.
+
+## Internet Testing With ngrok
+
+Set this in your environment when exposing the local Django server through ngrok:
+
+```powershell
+$env:ENABLE_NGROK="True"
+python manage.py runserver 127.0.0.1:8000
+ngrok http 8000
+```
+
+`ENABLE_NGROK=True` automatically allows common ngrok hostnames and CSRF trusted origins such as `https://*.ngrok-free.app`.
 
 ## Admin Usage Guide
 

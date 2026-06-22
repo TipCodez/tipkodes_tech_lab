@@ -9,11 +9,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-change-me-for-production")
 DEBUG = os.environ.get("DEBUG", "True").lower() in {"1", "true", "yes", "on"}
 USE_MANIFEST_STATIC = os.environ.get("USE_MANIFEST_STATIC", "False").lower() in {"1", "true", "yes", "on"}
+ENABLE_NGROK = os.environ.get("ENABLE_NGROK", "False").lower() in {"1", "true", "yes", "on"}
 ALLOWED_HOSTS = [
     host.strip()
     for host in os.environ.get("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
     if host.strip()
 ]
+if ENABLE_NGROK:
+    ALLOWED_HOSTS += [".ngrok-free.app", ".ngrok.app", ".ngrok.io"]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -101,6 +104,12 @@ CSRF_TRUSTED_ORIGINS = [
     for origin in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",")
     if origin.strip()
 ]
+if ENABLE_NGROK:
+    CSRF_TRUSTED_ORIGINS += [
+        "https://*.ngrok-free.app",
+        "https://*.ngrok.app",
+        "https://*.ngrok.io",
+    ]
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SESSION_COOKIE_SECURE = not DEBUG
