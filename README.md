@@ -108,7 +108,7 @@ python manage.py runserver 127.0.0.1:8000
 ngrok http 8000
 ```
 
-`ENABLE_NGROK=True` automatically allows common ngrok hostnames and CSRF trusted origins such as `https://*.ngrok-free.app`.
+Ngrok hostnames are allowed by default through `ENABLE_NGROK=True`. Set `ENABLE_NGROK=False` only when you want to disable ngrok host support. Restart Django after changing environment variables.
 
 ## Admin Usage Guide
 
