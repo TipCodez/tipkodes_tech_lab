@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}{{ finding.title }} | TIPKODES TECH LAB{% endblock %}
+{% block content %}
+<section class="detail-hero">
+  <div class="container"><span class="severity severity-{{ finding.severity|lower }}">{{ finding.severity }}</span><h1>{{ finding.title }}</h1><p>{{ finding.short_summary }}</p></div>
+</section>
+<section class="section-pad">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-8 content-stack">
+        <section><h2>Description</h2>{{ finding.full_description|linebreaks }}</section>
+        <section><h2>Impact</h2>{{ finding.impact|default:"Impact details can be added from Admin."|linebreaks }}</section>
+        <section><h2>Steps to Reproduce</h2>{{ finding.steps_to_reproduce|default:"Steps can be added from Admin."|linebreaks }}</section>
+        <section><h2>Recommended Fix</h2>{{ finding.recommended_fix|default:"Recommended fix can be added from Admin."|linebreaks }}</section>
+      </div>
+      <aside class="col-lg-4">
+        <div class="glass-card side-panel">
+          <h2>Finding Metadata</h2>
+          <dl><dt>Target</dt><dd>{{ finding.target_name|default:"Not set" }}</dd><dt>Type</dt><dd>{{ finding.target_type|default:"Not set" }}</dd><dt>Vulnerability</dt><dd>{{ finding.vulnerability_type }}</dd><dt>Status</dt><dd>{{ finding.status }}</dd><dt>Tools</dt><dd>{{ finding.tools_used|default:"Not set" }}</dd></dl>
+          {% if finding.proof_screenshot %}<img class="side-image" src="{{ finding.proof_screenshot.url }}" alt="{{ finding.title }} screenshot">{% endif %}
+          {% if finding.pdf_report %}<a class="btn btn-lab w-100" href="{{ finding.pdf_report.url }}"><i class="bi bi-download"></i> Download Report</a>{% endif %}
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+{% endblock %}

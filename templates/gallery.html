@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Gallery | TIPKODES TECH LAB{% endblock %}
+{% block content %}
+{% include "page_header.html" with page_title="Gallery" page_subtitle="Screenshots, diagrams, labs, certificates, events, and tutorial images." %}
+<section class="section-pad"><div class="container">
+  <form class="filter-bar" method="get"><input name="q" value="{{ request.GET.q }}" placeholder="Search gallery"><select name="category"><option value="">All categories</option>{% for cat in categories %}<option value="{{ cat.slug }}" {% if request.GET.category == cat.slug %}selected{% endif %}>{{ cat.name }}</option>{% endfor %}</select><button class="btn btn-lab" type="submit">Filter</button></form>
+  <div class="gallery-grid">{% for item in items %}<button class="gallery-item reveal" data-bs-toggle="modal" data-bs-target="#imageModal{{ item.id }}">{% if item.image %}<img src="{{ item.image.url }}" alt="{{ item.title }}">{% endif %}<span>{{ item.title }}</span></button><div class="modal fade" id="imageModal{{ item.id }}" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content lab-modal"><div class="modal-header"><h2 class="modal-title h5">{{ item.title }}</h2><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body">{% if item.image %}<img src="{{ item.image.url }}" alt="{{ item.title }}" class="w-100 rounded">{% endif %}<p>{{ item.description }}</p></div></div></div></div>{% empty %}<div class="empty-state">No gallery images found.</div>{% endfor %}</div>
+  {% include "pagination.html" %}
+</div></section>
+{% endblock %}

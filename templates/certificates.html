@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Certificates | TIPKODES TECH LAB{% endblock %}
+{% block content %}
+{% include "page_header.html" with page_title="Certificates" page_subtitle="Cybersecurity, cloud, Python, web, AI, workshops, awards, and professional training." %}
+<section class="section-pad"><div class="container">
+  <form class="filter-bar" method="get"><input name="q" value="{{ request.GET.q }}" placeholder="Search certificates"><select name="category"><option value="">All categories</option>{% for cat in categories %}<option value="{{ cat.slug }}" {% if request.GET.category == cat.slug %}selected{% endif %}>{{ cat.name }}</option>{% endfor %}</select><button class="btn btn-lab" type="submit">Filter</button></form>
+  <div class="row g-4">{% for item in items %}<div class="col-md-6 col-xl-4">{% include "partials.html" with card_type="certificate" item=item %}</div>{% empty %}<div class="col"><div class="empty-state">No certificates found.</div></div>{% endfor %}</div>
+  {% include "pagination.html" %}
+</div></section>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}About | TIPKODES TECH LAB{% endblock %}
+{% block content %}
+{% include "page_header.html" with page_title="About" page_subtitle="The story, mission, tools, and career goals behind the lab." %}
+<section class="section-pad">
+  <div class="container">
+    <div class="row g-4 align-items-start">
+      <div class="col-lg-4">
+        <div class="profile-panel glass-card">
+          {% if profile.profile_photo %}<img src="{{ profile.profile_photo.url }}" alt="{{ profile.full_name }}">{% else %}<div class="avatar-placeholder"><i class="bi bi-person-workspace"></i></div>{% endif %}
+          <h2>{{ profile.full_name|default:"TIPKODES" }}</h2>
+          <p>{{ profile.professional_title|default:"Cybersecurity Student | Python Developer" }}</p>
+          {% if site_resume.cv_file %}<a class="btn btn-lab w-100" href="{{ site_resume.cv_file.url }}"><i class="bi bi-download"></i> Download CV</a>{% endif %}
+        </div>
+      </div>
+      <div class="col-lg-8">
+        <div class="content-stack">
+          <section><h2>Who I Am</h2><p>{{ profile.biography|default:profile.short_bio|default:"Add your biography from Django Admin."|linebreaks }}</p></section>
+          <section><h2>My Technology Journey</h2><p>{{ profile.technology_journey|default:"Document the journey from learning fundamentals to building real projects."|linebreaks }}</p></section>
+          <section><h2>Education</h2><p>{{ profile.education|default:"Add educational background from Admin."|linebreaks }}</p></section>
+          <section><h2>Career Goals</h2><p>{{ profile.career_goals|default:"Add career goals from Admin."|linebreaks }}</p></section>
+          <section><h2>Tools I Use</h2><p>{{ profile.tools_used|default:"Python, Django, Linux, Git, VS Code, Cloud Platforms"|linebreaks }}</p></section>
+          <section><h2>My Mission</h2><p>{{ profile.mission|default:"Build practical technology solutions, document the learning process, and grow into a stronger engineer."|linebreaks }}</p></section>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

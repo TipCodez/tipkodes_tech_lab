@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Resume | TIPKODES TECH LAB{% endblock %}
+{% block content %}
+{% include "page_header.html" with page_title="Resume / CV" page_subtitle="Professional summary, education, experience, skills, projects, and certifications." %}
+<section class="section-pad"><div class="container narrow">
+  {% if resume %}
+    <div class="resume-panel glass-card"><div class="section-heading compact"><div><h2>{{ resume.full_name }}</h2><p>{{ resume.professional_title }}</p></div>{% if resume.cv_file %}<a class="btn btn-lab" href="{{ resume.cv_file.url }}"><i class="bi bi-download"></i> Download CV</a>{% endif %}</div><section><h3>Professional Summary</h3>{{ resume.professional_summary|linebreaks }}</section><section><h3>Education</h3>{{ resume.education|linebreaks }}</section><section><h3>Experience</h3>{{ resume.experience|linebreaks }}</section><section><h3>Technical Skills</h3>{{ resume.technical_skills_summary|linebreaks }}</section><section><h3>Projects</h3>{{ resume.projects_summary|linebreaks }}</section><section><h3>Certifications</h3>{{ resume.certifications_summary|linebreaks }}</section></div>
+  {% else %}
+    <div class="empty-state">Create resume information from Django Admin.</div>
+  {% endif %}
+</div></section>
+{% endblock %}

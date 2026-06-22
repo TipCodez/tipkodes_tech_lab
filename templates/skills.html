@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Skills | TIPKODES TECH LAB{% endblock %}
+{% block content %}
+{% include "page_header.html" with page_title="Skills" page_subtitle="Cybersecurity, programming, cloud, web, database, AI/data, tools, and soft skills." %}
+<section class="section-pad"><div class="container">
+  <form class="filter-bar" method="get"><select name="category"><option value="">All categories</option>{% for cat in categories %}<option value="{{ cat.slug }}" {% if request.GET.category == cat.slug %}selected{% endif %}>{{ cat.name }}</option>{% endfor %}</select><button class="btn btn-lab" type="submit">Filter</button></form>
+  <div class="skill-grid">{% for skill in skills %}<article class="skill-card reveal"><i class="{{ skill.icon|default:'bi bi-stars' }}"></i><h3>{{ skill.name }}</h3><span>{{ skill.category.name|default:"Skill" }}</span><strong>{{ skill.skill_level }}</strong><p>{{ skill.description }}</p></article>{% empty %}<div class="empty-state">No skills found.</div>{% endfor %}</div>
+</div></section>
+{% endblock %}

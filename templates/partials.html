@@ -1,0 +1,54 @@
+{% load core_extras %}
+{% comment %}Shared include fragments selected by card_type and object context.{% endcomment %}
+{% if card_type == "project" %}
+<article class="lab-card h-100 reveal">
+  <div class="media-frame">{% if item.main_image %}<img src="{{ item.main_image.url }}" alt="{{ item.title }}">{% else %}<div class="placeholder-visual"><i class="bi bi-code-slash"></i></div>{% endif %}</div>
+  <div class="card-body">
+    <div class="meta-row"><span>{{ item.category.name|default:"Project" }}</span><span class="status-badge">{{ item.status }}</span></div>
+    <h3>{{ item.title }}</h3>
+    <p>{{ item.short_description }}</p>
+    <div class="chip-row">{% for tech in item.technologies_used|split_csv|slice:":4" %}<span>{{ tech }}</span>{% endfor %}</div>
+    <a class="card-link" href="{{ item.get_absolute_url }}">View project <i class="bi bi-arrow-right"></i></a>
+  </div>
+</article>
+{% elif card_type == "blog" %}
+<article class="lab-card h-100 reveal">
+  <div class="media-frame">{% if item.featured_image %}<img src="{{ item.featured_image.url }}" alt="{{ item.title }}">{% else %}<div class="placeholder-visual"><i class="bi bi-journal-code"></i></div>{% endif %}</div>
+  <div class="card-body">
+    <div class="meta-row"><span>{{ item.category.name|default:"Blog" }}</span><span>{{ item.reading_time }} min read</span></div>
+    <h3>{{ item.title }}</h3>
+    <p>{{ item.short_excerpt }}</p>
+    <a class="card-link" href="{{ item.get_absolute_url }}">Read article <i class="bi bi-arrow-right"></i></a>
+  </div>
+</article>
+{% elif card_type == "finding" %}
+<article class="lab-card h-100 reveal">
+  <div class="card-body">
+    <div class="meta-row"><span>{{ item.vulnerability_type }}</span><span class="severity severity-{{ item.severity|lower }}">{{ item.severity }}</span></div>
+    <h3>{{ item.title }}</h3>
+    <p>{{ item.short_summary }}</p>
+    <div class="chip-row"><span>{{ item.target_type|default:"Lab" }}</span><span>{{ item.status }}</span></div>
+    <a class="card-link" href="{{ item.get_absolute_url }}">View finding <i class="bi bi-arrow-right"></i></a>
+  </div>
+</article>
+{% elif card_type == "certificate" %}
+<article class="lab-card h-100 reveal">
+  <div class="media-frame">{% if item.certificate_image %}<img src="{{ item.certificate_image.url }}" alt="{{ item.title }}">{% else %}<div class="placeholder-visual"><i class="bi bi-award"></i></div>{% endif %}</div>
+  <div class="card-body">
+    <div class="meta-row"><span>{{ item.category.name|default:"Certificate" }}</span><span>{{ item.date_issued|date:"Y" }}</span></div>
+    <h3>{{ item.title }}</h3>
+    <p>{{ item.issuing_organization }}</p>
+    {% if item.certificate_pdf %}<a class="card-link" href="{{ item.certificate_pdf.url }}">Download PDF <i class="bi bi-download"></i></a>{% endif %}
+  </div>
+</article>
+{% elif card_type == "video" %}
+<article class="lab-card h-100 reveal">
+  <div class="media-frame">{% if item.thumbnail_image %}<img src="{{ item.thumbnail_image.url }}" alt="{{ item.title }}">{% else %}<div class="placeholder-visual"><i class="bi bi-play-circle"></i></div>{% endif %}</div>
+  <div class="card-body">
+    <div class="meta-row"><span>{{ item.category.name|default:"Video" }}</span><span>{{ item.published_date|date:"M d, Y" }}</span></div>
+    <h3>{{ item.title }}</h3>
+    <p>{{ item.description|truncatewords:22 }}</p>
+    <a class="card-link" href="{{ item.get_absolute_url }}">Watch <i class="bi bi-arrow-right"></i></a>
+  </div>
+</article>
+{% endif %}

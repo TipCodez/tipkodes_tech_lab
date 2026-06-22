@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Search | TIPKODES TECH LAB{% endblock %}
+{% block content %}
+{% include "page_header.html" with page_title="Search Results" page_subtitle="Global search across projects, blog posts, findings, videos, certificates, gallery, Python, and cloud." %}
+<section class="section-pad"><div class="container narrow">
+  <form class="filter-bar" method="get"><input name="q" value="{{ query }}" placeholder="Search the lab"><button class="btn btn-lab" type="submit"><i class="bi bi-search"></i> Search</button></form>
+  <div class="stack-list">{% for item in items %}<a href="{% if item.get_absolute_url %}{{ item.get_absolute_url }}{% else %}#{% endif %}"><span>{{ item.model_name|default:item.category.name|default:"Result" }}</span><strong>{{ item.title }}</strong></a>{% empty %}<div class="empty-state">No results found.</div>{% endfor %}</div>
+  {% include "pagination.html" %}
+</div></section>
+{% endblock %}

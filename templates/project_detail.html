@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load core_extras %}
+{% block title %}{{ project.title }} | TIPKODES TECH LAB{% endblock %}
+{% block content %}
+<section class="detail-hero">
+  <div class="container">
+    <span class="status-badge">{{ project.status }}</span>
+    <h1>{{ project.title }}</h1>
+    <p>{{ project.short_description }}</p>
+    <div class="hero-actions">
+      {% if project.github_link %}<a class="btn btn-lab" href="{{ project.github_link }}" target="_blank" rel="noopener"><i class="bi bi-github"></i> GitHub</a>{% endif %}
+      {% if project.live_demo_link %}<a class="btn btn-ghost" href="{{ project.live_demo_link }}" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right"></i> Live Demo</a>{% endif %}
+      {% if project.pdf_documentation %}<a class="btn btn-ghost" href="{{ project.pdf_documentation.url }}"><i class="bi bi-download"></i> PDF Docs</a>{% endif %}
+    </div>
+  </div>
+</section>
+<section class="section-pad">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <div class="content-stack">
+          <section><h2>Overview</h2>{{ project.full_description|linebreaks }}</section>
+          <section><h2>Problem Solved</h2>{{ project.problem_solved|default:"Add the problem this project solves from Admin."|linebreaks }}</section>
+          <section><h2>Key Features</h2>{{ project.key_features|default:"Add key features from Admin."|linebreaks }}</section>
+        </div>
+        <div class="gallery-strip">
+          {% for shot in project.images.all %}<figure><img src="{{ shot.image.url }}" alt="{{ shot.caption }}"><figcaption>{{ shot.caption }}</figcaption></figure>{% endfor %}
+        </div>
+      </div>
+      <aside class="col-lg-4">
+        <div class="glass-card side-panel">
+          <h2>Project Stack</h2>
+          <div class="chip-row">{% for tech in project.technologies_used|split_csv %}<span>{{ tech }}</span>{% empty %}<span>Add technologies</span>{% endfor %}</div>
+          <dl><dt>Category</dt><dd>{{ project.category.name|default:"Not set" }}</dd><dt>Career Track</dt><dd>{{ project.career_track.title|default:"Not linked" }}</dd><dt>Started</dt><dd>{{ project.date_started|default:"Not set" }}</dd><dt>Completed</dt><dd>{{ project.date_completed|default:"Not set" }}</dd></dl>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+{% endblock %}

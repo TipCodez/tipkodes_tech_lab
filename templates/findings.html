@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Cybersecurity Findings | TIPKODES TECH LAB{% endblock %}
+{% block content %}
+{% include "page_header.html" %}
+<section class="section-pad">
+  <div class="container">
+    <div class="ethical-note">All cybersecurity findings published on this platform are documented for authorized testing, lab practice, personal projects, academic learning, or responsible disclosure only.</div>
+    <form class="filter-bar" method="get">
+      <input name="q" value="{{ request.GET.q }}" placeholder="Search findings">
+      <input name="vulnerability" value="{{ request.GET.vulnerability }}" placeholder="Vulnerability type">
+      <input name="target" value="{{ request.GET.target }}" placeholder="Target type">
+      <select name="severity"><option value="">All severities</option>{% for value,label in severity_choices %}<option value="{{ value }}" {% if request.GET.severity == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+      <button class="btn btn-lab" type="submit"><i class="bi bi-funnel"></i> Filter</button>
+    </form>
+    <div class="row g-4">{% for item in items %}<div class="col-md-6 col-xl-4">{% include "partials.html" with card_type="finding" item=item %}</div>{% empty %}<div class="col"><div class="empty-state">No findings found.</div></div>{% endfor %}</div>
+    {% include "pagination.html" %}
+  </div>
+</section>
+{% endblock %}

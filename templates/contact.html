@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Contact | TIPKODES TECH LAB{% endblock %}
+{% block content %}
+{% include "page_header.html" with page_title="Contact" page_subtitle="Send a message, ask a question, or connect for collaboration." %}
+<section class="section-pad"><div class="container"><div class="row g-4">
+  <div class="col-lg-5"><div class="glass-card side-panel"><h2>Contact Details</h2><dl><dt>Email</dt><dd>{{ profile.email|default:"Add email in Admin" }}</dd><dt>Location</dt><dd>{{ profile.location|default:"Add location in Admin" }}</dd><dt>GitHub</dt><dd>{% if profile.github %}<a href="{{ profile.github }}">{{ profile.github }}</a>{% else %}Not set{% endif %}</dd><dt>LinkedIn</dt><dd>{% if profile.linkedin %}<a href="{{ profile.linkedin }}">{{ profile.linkedin }}</a>{% else %}Not set{% endif %}</dd></dl></div></div>
+  <div class="col-lg-7"><form class="contact-form glass-card" method="post">{% csrf_token %}{% for field in form %}<label>{{ field.label }}{{ field }}</label>{% if field.errors %}<div class="form-error">{{ field.errors|join:", " }}</div>{% endif %}{% endfor %}<button class="btn btn-lab" type="submit"><i class="bi bi-send"></i> Send Message</button></form></div>
+</div></div></section>
+{% endblock %}

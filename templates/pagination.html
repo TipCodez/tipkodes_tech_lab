@@ -1,0 +1,12 @@
+{% load core_extras %}
+{% if items.has_other_pages %}
+<nav class="lab-pagination" aria-label="Pagination">
+  {% if items.has_previous %}
+    <a href="?{% querystring page=items.previous_page_number %}"><i class="bi bi-chevron-left"></i></a>
+  {% endif %}
+  <span>Page {{ items.number }} of {{ items.paginator.num_pages }}</span>
+  {% if items.has_next %}
+    <a href="?{% querystring page=items.next_page_number %}"><i class="bi bi-chevron-right"></i></a>
+  {% endif %}
+</nav>
+{% endif %}
