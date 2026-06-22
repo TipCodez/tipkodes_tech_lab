@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: tipkodes-tech-lab
+    runtime: python
+    buildCommand: bash build.sh
+    startCommand: gunicorn config.wsgi:application
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ENABLE_NGROK
+        value: "False"
+      - key: USE_MANIFEST_STATIC
+        value: "True"
+      - key: SECURE_SSL_REDIRECT
+        value: "True"
+      - key: SECURE_HSTS_SECONDS
+        value: "31536000"
+      - key: SECURE_HSTS_INCLUDE_SUBDOMAINS
+        value: "True"
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: CSRF_TRUSTED_ORIGINS
+        value: "https://*.onrender.com"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: tipkodes-tech-lab-db
+          property: connectionString
+
+databases:
+  - name: tipkodes-tech-lab-db
+    databaseName: tipkodes_tech_lab
+    user: tipkodes_tech_lab

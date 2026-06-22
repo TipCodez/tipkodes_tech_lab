@@ -110,6 +110,40 @@ ngrok http 8000
 
 Ngrok hostnames are allowed by default through `ENABLE_NGROK=True`. Set `ENABLE_NGROK=False` only when you want to disable ngrok host support. Restart Django after changing environment variables.
 
+## Render Hosting While Building
+
+This repo includes Render-ready deployment files:
+
+- `render.yaml` creates a web service and PostgreSQL database.
+- `build.sh` installs dependencies, collects static files, and runs migrations.
+- `runtime.txt` pins Python for Render.
+
+Recommended Render setup:
+
+1. Push your latest code to GitHub.
+2. In Render, choose **New +** then **Blueprint**.
+3. Connect this repository.
+4. Render will read `render.yaml` and create:
+   - web service: `tipkodes-tech-lab`
+   - database: `tipkodes-tech-lab-db`
+5. After deployment, open the Render shell and create your admin user:
+
+```bash
+python manage.py createsuperuser
+```
+
+Render environment defaults from `render.yaml`:
+
+- `DEBUG=False`
+- `USE_MANIFEST_STATIC=True`
+- `ENABLE_NGROK=False`
+- `SECURE_SSL_REDIRECT=True`
+- `ALLOWED_HOSTS=.onrender.com`
+- `CSRF_TRUSTED_ORIGINS=https://*.onrender.com`
+- `DATABASE_URL` from the Render PostgreSQL database
+
+For media uploads on Render, local uploaded files are not durable across deploys. Use Cloudinary or another external media storage service before relying on production uploads.
+
 ## Admin Usage Guide
 
 1. Create categories first. Choose the correct category type for each module.

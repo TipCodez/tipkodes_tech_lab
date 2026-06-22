@@ -15,6 +15,9 @@ ALLOWED_HOSTS = [
     for host in os.environ.get("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
     if host.strip()
 ]
+RENDER_EXTERNAL_HOSTNAME = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 if ENABLE_NGROK or DEBUG:
     ALLOWED_HOSTS += [".ngrok-free.app", ".ngrok.app", ".ngrok.io"]
 
@@ -104,6 +107,8 @@ CSRF_TRUSTED_ORIGINS = [
     for origin in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",")
     if origin.strip()
 ]
+if RENDER_EXTERNAL_HOSTNAME:
+    CSRF_TRUSTED_ORIGINS.append(f"https://{RENDER_EXTERNAL_HOSTNAME}")
 if ENABLE_NGROK or DEBUG:
     CSRF_TRUSTED_ORIGINS += [
         "https://*.ngrok-free.app",
