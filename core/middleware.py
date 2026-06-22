@@ -1,4 +1,11 @@
+import logging
+
+from django.db import DatabaseError
+
 from .models import PageView
+
+
+logger = logging.getLogger(__name__)
 
 
 class PageViewMiddleware:
@@ -8,13 +15,16 @@ class PageViewMiddleware:
     def __call__(self, request):
         response = self.get_response(request)
         if self.should_track(request, response):
-            PageView.objects.create(
-                path=request.path[:260],
-                page_title=getattr(response, "reason_phrase", "")[:220],
-                ip_address=self.get_client_ip(request),
-                user_agent=request.META.get("HTTP_USER_AGENT", "")[:1000],
-                referrer=request.META.get("HTTP_REFERER", "")[:200],
-            )
+            try:
+                PageView.objects.create(
+                    path=request.path[:260],
+                    page_title=getattr(response, "reason_phrase", "")[:220],
+                    ip_address=self.get_client_ip(request),
+                    user_agent=request.META.get("HTTP_USER_AGENT", "")[:1000],
+                    referrer=request.META.get("HTTP_REFERER", "")[:200],
+                )
+            except DatabaseError:
+                logger.exception("Unable to record page view for %s", request.path)
         return response
 
     def should_track(self, request, response):

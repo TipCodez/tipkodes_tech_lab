@@ -145,7 +145,14 @@ def home(request):
 
 
 def about(request):
-    return render(request, "about.html", {"profile": Profile.objects.order_by("-updated_at").first()})
+    return render(
+        request,
+        "about.html",
+        {
+            "profile": Profile.objects.order_by("-updated_at").first(),
+            "site_resume": Resume.objects.order_by("-updated_at").first(),
+        },
+    )
 
 
 def career_tracks(request):
