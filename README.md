@@ -144,6 +144,8 @@ Render environment defaults from `render.yaml`:
 
 For media uploads on Render, local uploaded files are not durable across deploys. Use Cloudinary or another external media storage service before relying on production uploads.
 
+For manual free Web Service setup, copy the values from `render.env.example` into Render's Environment tab.
+
 ## Admin Usage Guide
 
 1. Create categories first. Choose the correct category type for each module.
