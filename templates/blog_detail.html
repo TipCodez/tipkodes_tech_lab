@@ -3,4 +3,34 @@
 {% block content %}
 <section class="detail-hero"><div class="container"><span class="status-badge">{{ post.category.name|default:"Blog" }}</span><h1>{{ post.title }}</h1><p>{{ post.short_excerpt }}</p><div class="meta-row wide"><span>{{ post.author }}</span><span>{{ post.published_date|date:"M d, Y" }}</span><span>{{ post.reading_time }} min read</span></div></div></section>
 <section class="section-pad"><div class="container narrow"><article class="article-body">{{ post.full_content|linebreaks }}</article><div class="share-row"><span>Share</span><a href="https://www.linkedin.com/shareArticle?mini=true&url={{ request.build_absolute_uri }}" target="_blank" rel="noopener">LinkedIn</a><a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}" target="_blank" rel="noopener">X</a></div></div></section>
+<section class="section-pad alt-section">
+  <div class="container narrow">
+    <div class="section-heading compact">
+      <div>
+        <p class="eyebrow">Discussion</p>
+        <h2>Comments</h2>
+      </div>
+    </div>
+    <div class="comment-list">
+      {% for comment in comments %}
+        <article class="comment-card">
+          <div class="meta-row wide"><strong>{{ comment.name }}</strong><span>{{ comment.created_at|date:"M d, Y" }}</span></div>
+          <p>{{ comment.comment|linebreaksbr }}</p>
+        </article>
+      {% empty %}
+        <div class="empty-state">No approved comments yet.</div>
+      {% endfor %}
+    </div>
+    <form class="contact-form glass-card comment-form" method="post">
+      {% csrf_token %}
+      <h3>Leave a Comment</h3>
+      <p>Comments are reviewed before they appear publicly.</p>
+      {% for field in comment_form %}
+        <label>{{ field.label }}{{ field }}</label>
+        {% if field.errors %}<div class="form-error">{{ field.errors|join:", " }}</div>{% endif %}
+      {% endfor %}
+      <button class="btn btn-lab" type="submit"><i class="bi bi-chat-dots"></i> Submit Comment</button>
+    </form>
+  </div>
+</section>
 {% endblock %}

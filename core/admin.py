@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from .models import (
     BlogPost,
+    BlogComment,
     CareerTrack,
     Category,
     Certificate,
@@ -23,6 +24,7 @@ from .models import (
 admin.site.site_header = "TIPKODES TECH LAB Admin"
 admin.site.site_title = "TIPKODES TECH LAB"
 admin.site.index_title = "Content Management"
+admin.site.index_template = "admin/index.html"
 
 
 @admin.register(Profile)
@@ -100,6 +102,25 @@ class BlogPostAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("title",)}
     filter_horizontal = ("tags",)
     readonly_fields = ("created_at", "updated_at")
+
+
+@admin.action(description="Approve selected comments")
+def approve_comments(modeladmin, request, queryset):
+    queryset.update(is_approved=True)
+
+
+@admin.action(description="Unapprove selected comments")
+def unapprove_comments(modeladmin, request, queryset):
+    queryset.update(is_approved=False)
+
+
+@admin.register(BlogComment)
+class BlogCommentAdmin(admin.ModelAdmin):
+    list_display = ("name", "post", "is_approved", "created_at")
+    list_filter = ("is_approved", "created_at", "post")
+    search_fields = ("name", "email", "comment", "post__title")
+    readonly_fields = ("created_at", "updated_at")
+    actions = [approve_comments, unapprove_comments]
 
 
 @admin.register(GalleryImage)

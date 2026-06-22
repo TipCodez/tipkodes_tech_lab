@@ -1,4 +1,21 @@
 (function () {
+  const root = document.documentElement;
+  const themeToggle = document.getElementById("themeToggle");
+  const setTheme = (theme) => {
+    root.dataset.theme = theme;
+    localStorage.setItem("tipkodes-theme", theme);
+    if (themeToggle) {
+      const icon = themeToggle.querySelector("i");
+      if (icon) icon.className = theme === "light" ? "bi bi-moon-stars" : "bi bi-sun";
+    }
+  };
+  setTheme(localStorage.getItem("tipkodes-theme") || "dark");
+  if (themeToggle) {
+    themeToggle.addEventListener("click", () => {
+      setTheme(root.dataset.theme === "light" ? "dark" : "light");
+    });
+  }
+
   const nav = document.querySelector(".lab-navbar");
   const updateNav = () => {
     if (!nav) return;

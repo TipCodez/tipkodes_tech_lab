@@ -5,7 +5,7 @@ from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
 
-from .forms import ContactForm
+from .forms import BlogCommentForm, ContactForm
 from .models import (
     BlogPost,
     CareerTrack,
@@ -182,8 +182,24 @@ def blog(request):
 
 def blog_detail(request, slug):
     post = get_object_or_404(BlogPost.objects.prefetch_related("tags"), slug=slug, status=BlogPost.Status.PUBLISHED)
+    comment_form = BlogCommentForm(request.POST or None)
+    if request.method == "POST" and comment_form.is_valid():
+        comment = comment_form.save(commit=False)
+        comment.post = post
+        comment.save()
+        messages.success(request, "Your comment was submitted and is waiting for approval.")
+        return redirect(post.get_absolute_url())
     related = BlogPost.objects.filter(status=BlogPost.Status.PUBLISHED, category=post.category).exclude(pk=post.pk)[:3]
-    return render(request, "blog_detail.html", {"post": post, "related_posts": related})
+    return render(
+        request,
+        "blog_detail.html",
+        {
+            "post": post,
+            "related_posts": related,
+            "comment_form": comment_form,
+            "comments": post.comments.filter(is_approved=True),
+        },
+    )
 
 
 def gallery(request):

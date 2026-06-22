@@ -1,0 +1,94 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static admin_extras %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+  :root {
+    --ttl-bg: #050816;
+    --ttl-panel: #101827;
+    --ttl-line: rgba(255,255,255,.12);
+    --ttl-cyan: #00d4ff;
+    --ttl-green: #00ff88;
+    --ttl-muted: #a0aec0;
+  }
+  #content h1 { font-weight: 800; }
+  .ttl-dashboard {
+    margin: 0 0 24px;
+    padding: 24px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #071024, #101827);
+    color: #fff;
+    border: 1px solid var(--ttl-line);
+  }
+  .ttl-dashboard h2 {
+    margin: 0;
+    color: #fff;
+    font-size: 28px;
+    font-weight: 900;
+  }
+  .ttl-dashboard p { margin: 8px 0 0; color: var(--ttl-muted); }
+  .ttl-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 18px;
+  }
+  .ttl-stat {
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid var(--ttl-line);
+    background: rgba(255,255,255,.06);
+  }
+  .ttl-stat strong { display: block; color: var(--ttl-cyan); font-size: 28px; line-height: 1; }
+  .ttl-stat span { display: block; margin-top: 8px; color: var(--ttl-muted); font-weight: 700; }
+  .ttl-action-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+  }
+  .ttl-action-row a {
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--ttl-cyan), var(--ttl-green));
+    color: #03111f !important;
+    font-weight: 800;
+    text-decoration: none;
+  }
+  @media (max-width: 1000px) {
+    .ttl-stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 560px) {
+    .ttl-stat-grid { grid-template-columns: 1fr; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+{% dashboard_stats as stats %}
+<section class="ttl-dashboard">
+  <h2>TIPKODES TECH LAB Dashboard</h2>
+  <p>Quick content overview for projects, findings, blog posts, comments, messages, media, certificates, and skills.</p>
+  <div class="ttl-stat-grid">
+    <div class="ttl-stat"><strong>{{ stats.projects }}</strong><span>Total Projects</span></div>
+    <div class="ttl-stat"><strong>{{ stats.published_blogs }}/{{ stats.blogs }}</strong><span>Published Blog Posts</span></div>
+    <div class="ttl-stat"><strong>{{ stats.findings }}</strong><span>Cyber Findings</span></div>
+    <div class="ttl-stat"><strong>{{ stats.unread_messages }}</strong><span>Unread Messages</span></div>
+    <div class="ttl-stat"><strong>{{ stats.pending_comments }}</strong><span>Pending Comments</span></div>
+    <div class="ttl-stat"><strong>{{ stats.certificates }}</strong><span>Certificates</span></div>
+    <div class="ttl-stat"><strong>{{ stats.skills }}</strong><span>Skills</span></div>
+    <div class="ttl-stat"><strong>{{ stats.videos }}</strong><span>Videos</span></div>
+  </div>
+  <div class="ttl-action-row">
+    <a href="{% url 'admin:core_project_add' %}">Add Project</a>
+    <a href="{% url 'admin:core_blogpost_add' %}">Write Blog</a>
+    <a href="{% url 'admin:core_cyberfinding_add' %}">Add Finding</a>
+    <a href="{% url 'admin:core_blogcomment_changelist' %}?is_approved__exact=0">Review Comments</a>
+    <a href="{% url 'admin:core_contactmessage_changelist' %}?is_read__exact=0">Unread Messages</a>
+  </div>
+</section>
+<div id="content-main">
+  {% include "admin/app_list.html" with app_list=app_list show_changelinks=True %}
+</div>
+{% endblock %}

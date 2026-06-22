@@ -17,6 +17,20 @@
   --shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
 }
 
+[data-theme="light"] {
+  --bg: #f7fafc;
+  --bg-2: #e8eef8;
+  --panel: rgba(255, 255, 255, 0.78);
+  --panel-strong: rgba(255, 255, 255, 0.95);
+  --line: rgba(15, 23, 42, 0.12);
+  --text: #0f172a;
+  --muted: #475569;
+  --cyan: #0369a1;
+  --green: #047857;
+  --violet: #6d28d9;
+  --shadow: 0 24px 60px rgba(15, 23, 42, 0.14);
+}
+
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 body {
@@ -56,9 +70,24 @@ main { overflow: hidden; }
 .navbar .nav-link:hover, .navbar .nav-link:focus { color: var(--cyan); }
 .navbar-toggler { border-color: var(--line); }
 .navbar-toggler-icon { filter: invert(1); }
+[data-theme="light"] .navbar-toggler-icon { filter: none; }
 .dropdown-menu { background: #10172a; border: 1px solid var(--line); border-radius: var(--radius); }
 .dropdown-item { color: var(--muted); }
 .dropdown-item:hover { background: rgba(0, 212, 255, 0.12); color: var(--text); }
+[data-theme="light"] .lab-navbar { background: rgba(255, 255, 255, 0.88); }
+[data-theme="light"] .dropdown-menu { background: #ffffff; }
+
+.theme-toggle {
+  width: 2.65rem;
+  height: 2.65rem;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  color: var(--text);
+  background: var(--panel);
+  display: inline-grid;
+  place-items: center;
+}
+.theme-toggle:hover { border-color: var(--cyan); color: var(--cyan); }
 
 .btn {
   border-radius: 8px;
@@ -136,6 +165,7 @@ h1, h2, h3 { letter-spacing: 0; }
 .terminal-top span:nth-child(2) { background: var(--green); }
 .terminal-top span:nth-child(3) { background: var(--violet); }
 .terminal-card pre { margin: 0; padding: 2rem; background: rgba(0, 0, 0, 0.3); border-radius: var(--radius); color: var(--green); white-space: pre-wrap; }
+[data-theme="light"] .terminal-card pre { background: rgba(255, 255, 255, 0.72); }
 
 .section-pad { padding: 5.5rem 0; }
 .alt-section { background: rgba(255, 255, 255, 0.03); border-block: 1px solid var(--line); }
@@ -305,6 +335,15 @@ h1, h2, h3 { letter-spacing: 0; }
 .contact-form { display: grid; gap: 1rem; }
 .contact-form label { color: var(--muted); font-weight: 800; display: grid; gap: 0.45rem; }
 .form-error { color: var(--danger); font-size: 0.9rem; }
+.comment-list { display: grid; gap: 1rem; margin-bottom: 1.5rem; }
+.comment-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1rem;
+}
+.comment-card p, .comment-form p { color: var(--muted); line-height: 1.7; margin: 0.8rem 0 0; }
+.comment-form h3 { font-weight: 900; margin: 0; }
 .share-row { display: flex; gap: 1rem; margin-top: 1rem; color: var(--muted); }
 .share-row a { color: var(--cyan); font-weight: 800; }
 
