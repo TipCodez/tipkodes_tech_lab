@@ -39,10 +39,10 @@ class SluggedModel(TimeStampedModel):
 
 
 class Profile(TimeStampedModel):
-    full_name = models.CharField(max_length=160, default="TIPKODES")
-    professional_title = models.CharField(max_length=180, default="Cybersecurity Student | Python Developer")
+    full_name = models.CharField(max_length=160, default="Raphael Tibil Punobyin")
+    professional_title = models.CharField(max_length=180, default="BSc. Computer Science Student | AWS Certified Cloud Practitioner | Cybersecurity Enthusiast | Python Developer")
     tagline = models.CharField(max_length=220, default="Cybersecurity, Python, Cloud Computing, and Real-World Tech Projects")
-    short_bio = models.TextField(default="A holistic technology lab for projects, findings, research, certificates, and career growth.")
+    short_bio = models.TextField(default="I am a BSc. Computer Science student at the University of Energy and Natural Resources with a strong passion for technology, Python backend development, networking, cybersecurity, online instruction, graphic design, and video editing.")
     biography = models.TextField(blank=True)
     education = models.TextField(blank=True)
     technology_journey = models.TextField(blank=True)

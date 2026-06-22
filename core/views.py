@@ -131,7 +131,7 @@ def home(request):
         request,
         "home.html",
         {
-            "profile": Profile.objects.first(),
+            "profile": Profile.objects.order_by("-updated_at").first(),
             "featured_projects": Project.objects.filter(featured=True)[:3],
             "latest_blogs": BlogPost.objects.filter(status=BlogPost.Status.PUBLISHED)[:3],
             "latest_findings": CyberFinding.objects.filter(is_public=True)[:3],
@@ -145,7 +145,7 @@ def home(request):
 
 
 def about(request):
-    return render(request, "about.html", {"profile": Profile.objects.first()})
+    return render(request, "about.html", {"profile": Profile.objects.order_by("-updated_at").first()})
 
 
 def career_tracks(request):
@@ -348,7 +348,7 @@ def skills(request):
 
 
 def resume(request):
-    return render(request, "resume.html", {"resume": Resume.objects.first()})
+    return render(request, "resume.html", {"resume": Resume.objects.order_by("-updated_at").first()})
 
 
 def contact(request):
@@ -365,7 +365,7 @@ def contact(request):
             )
         messages.success(request, "Your message has been saved. I will get back to you soon.")
         return redirect("contact")
-    return render(request, "contact.html", {"form": form, "profile": Profile.objects.first()})
+    return render(request, "contact.html", {"form": form, "profile": Profile.objects.order_by("-updated_at").first()})
 
 
 def testimonials(request):

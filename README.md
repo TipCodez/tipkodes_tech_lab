@@ -139,6 +139,6 @@ Add screenshots in `static/images/` or upload live screenshots through the Galle
 
 ## Author
 
-TIPKODES
+Raphael Tibil Punobyin
 
-Cybersecurity, Python, Cloud Computing, and Real-World Tech Projects.
+BSc. Computer Science Student | AWS Certified Cloud Practitioner | Cybersecurity Enthusiast | Python Developer specializing in backend development with Django and FastAPI.

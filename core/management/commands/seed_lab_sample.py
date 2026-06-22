@@ -42,16 +42,20 @@ class Command(BaseCommand):
             ("Tools", "skill"): Category.objects.get_or_create(name="Tools", category_type="skill")[0],
         }
 
-        Profile.objects.get_or_create(
-            full_name="TIPKODES",
+        Profile.objects.update_or_create(
+            full_name="Raphael Tibil Punobyin",
             defaults={
-                "professional_title": "Cybersecurity Student | Python Developer | Cloud Learner",
-                "short_bio": "A personal technology lab for building, documenting, and showcasing real-world technical growth.",
-                "biography": "TIPKODES TECH LAB brings together cybersecurity findings, Python projects, cloud notes, videos, certificates, research, and career progress in one admin-managed platform.",
-                "technology_journey": "From programming fundamentals to Django applications, security labs, and cloud deployment practice.",
-                "career_goals": "Grow into a cybersecurity-aware software engineer who builds useful, secure, and well-documented systems.",
-                "tools_used": "Python, Django, Bootstrap, Git, Linux, VS Code, SQLite, PostgreSQL, AWS, Docker",
-                "mission": "Build practical projects, learn in public, document progress, and turn technical effort into a clear professional portfolio.",
+                "professional_title": "BSc. Computer Science Student | AWS Certified Cloud Practitioner | Cybersecurity Enthusiast | Python Developer",
+                "short_bio": "BSc. Computer Science student at the University of Energy and Natural Resources with a strong passion for technology, Python backend development, networking, cybersecurity, online instruction, graphic design, and video editing.",
+                "biography": "I am a BSc. Computer Science student at the University of Energy and Natural Resources with a strong passion for technology. As a Python developer and a networking and cybersecurity enthusiast, I enjoy exploring and building secure, efficient systems. I am also an online instructor, sharing my knowledge with others, and I have experience in graphic design and video editing, which allows me to bring a creative edge to technical projects.",
+                "education": "BSc. Computer Science, University of Energy and Natural Resources.",
+                "technology_journey": "My technology journey combines backend development with Django and FastAPI, cloud computing, cybersecurity, networking, online instruction, graphic design, and video editing.",
+                "cybersecurity_journey": "I am building practical cybersecurity knowledge through networking fundamentals, secure system design, vulnerability research, and ethical lab practice.",
+                "python_journey": "I use Python for backend development, automation, Django applications, FastAPI services, and practical problem-solving.",
+                "cloud_journey": "As an AWS Certified Cloud Practitioner, I continue to build cloud computing knowledge through deployment, hosting, and cloud security practice.",
+                "career_goals": "Grow into a strong backend and cybersecurity-aware cloud developer who builds secure, efficient, and creative technology solutions.",
+                "tools_used": "Python, Django, FastAPI, AWS, Linux, Git, VS Code, PostgreSQL, SQLite, Bootstrap, graphic design tools, video editing tools",
+                "mission": "Build secure and efficient systems, teach technology online, document real technical growth, and combine creativity with software engineering.",
                 "email": "hello@example.com",
                 "location": "Ghana",
             },
@@ -103,7 +107,7 @@ class Command(BaseCommand):
         BlogPost.objects.get_or_create(
             title="Building a Personal Technology Lab with Django",
             defaults={
-                "author": "TIPKODES",
+                "author": "Raphael Tibil Punobyin",
                 "category": categories[("Python", "blog")],
                 "short_excerpt": "Why a portfolio can become a living lab for projects, research, and career evidence.",
                 "full_content": "A strong technology portfolio should not only list work. It should explain the problems solved, tools used, lessons learned, and next steps. TIPKODES TECH LAB is built to support that workflow.",
@@ -220,14 +224,14 @@ class Command(BaseCommand):
             },
         )
 
-        Resume.objects.get_or_create(
-            full_name="TIPKODES",
+        Resume.objects.update_or_create(
+            full_name="Raphael Tibil Punobyin",
             defaults={
-                "professional_title": "Cybersecurity Student | Python Developer | Cloud Learner",
-                "professional_summary": "A growing technology professional documenting cybersecurity, Python, Django, cloud computing, and real-world project experience.",
-                "education": "Add your education details from Django Admin.",
-                "experience": "Add internships, training, freelance, academic, or lab experience from Django Admin.",
-                "technical_skills_summary": "Python, Django, Bootstrap, Linux, Git, security testing fundamentals, cloud deployment basics.",
+                "professional_title": "BSc. Computer Science Student | AWS Certified Cloud Practitioner | Cybersecurity Enthusiast | Python Developer",
+                "professional_summary": "BSc. Computer Science student at the University of Energy and Natural Resources with a strong passion for technology. Python backend developer with Django and FastAPI experience, networking and cybersecurity enthusiast, AWS Certified Cloud Practitioner, online instructor, graphic designer, and video editor.",
+                "education": "BSc. Computer Science, University of Energy and Natural Resources.",
+                "experience": "Online instructor sharing technology knowledge, with practical experience in backend development, networking and cybersecurity learning, graphic design, and video editing.",
+                "technical_skills_summary": "Python, Django, FastAPI, AWS Cloud, networking fundamentals, cybersecurity fundamentals, Linux, Git, Bootstrap, PostgreSQL, SQLite, graphic design, video editing.",
                 "projects_summary": "TIPKODES TECH LAB Portfolio Platform and other projects can be linked from the Projects module.",
                 "certifications_summary": "Add certifications from the Certificates module.",
                 "email": "hello@example.com",

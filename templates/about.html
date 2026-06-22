@@ -8,8 +8,8 @@
       <div class="col-lg-4">
         <div class="profile-panel glass-card">
           {% if profile.profile_photo %}<img src="{{ profile.profile_photo.url }}" alt="{{ profile.full_name }}">{% else %}<div class="avatar-placeholder"><i class="bi bi-person-workspace"></i></div>{% endif %}
-          <h2>{{ profile.full_name|default:"TIPKODES" }}</h2>
-          <p>{{ profile.professional_title|default:"Cybersecurity Student | Python Developer" }}</p>
+          <h2>{{ profile.full_name|default:"Raphael Tibil Punobyin" }}</h2>
+          <p>{{ profile.professional_title|default:"BSc. Computer Science Student | AWS Certified Cloud Practitioner | Cybersecurity Enthusiast | Python Developer" }}</p>
           {% if site_resume.cv_file %}<a class="btn btn-lab w-100" href="{{ site_resume.cv_file.url }}"><i class="bi bi-download"></i> Download CV</a>{% endif %}
         </div>
       </div>
