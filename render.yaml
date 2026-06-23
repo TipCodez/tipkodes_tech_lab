@@ -12,7 +12,7 @@ services:
       - key: ENABLE_NGROK
         value: "False"
       - key: USE_MANIFEST_STATIC
-        value: "True"
+        value: "False"
       - key: SECURE_SSL_REDIRECT
         value: "True"
       - key: SECURE_HSTS_SECONDS
