@@ -131,12 +131,18 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 if RENDER_EXTERNAL_HOSTNAME:
     CSRF_TRUSTED_ORIGINS.append(f"https://{RENDER_EXTERNAL_HOSTNAME}")
+CSRF_TRUSTED_ORIGINS += [
+    f"https://{host}"
+    for host in ALLOWED_HOSTS
+    if host.endswith(".onrender.com") and not host.startswith(".")
+]
 if ENABLE_NGROK or DEBUG:
     CSRF_TRUSTED_ORIGINS += [
         "https://*.ngrok-free.app",
         "https://*.ngrok.app",
         "https://*.ngrok.io",
     ]
+CSRF_TRUSTED_ORIGINS = list(dict.fromkeys(CSRF_TRUSTED_ORIGINS))
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SESSION_COOKIE_SECURE = not DEBUG
@@ -153,3 +159,4 @@ EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True").lower() in {"1", "true", "yes", "on"}
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
+CONTACT_RECIPIENT_EMAIL = os.environ.get("CONTACT_RECIPIENT_EMAIL", DEFAULT_FROM_EMAIL)

@@ -1,10 +1,11 @@
 from itertools import chain
+import logging
 
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator
-from django.core.mail import send_mail
+from django.core.mail import EmailMessage
 from django.db.models import Count, Q
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
@@ -33,6 +34,9 @@ from .models import (
     TimelineEvent,
     Video,
 )
+
+
+logger = logging.getLogger(__name__)
 
 
 def paginate(request, queryset, per_page=9):
@@ -361,16 +365,35 @@ def resume(request):
 def contact(request):
     form = ContactForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
-        message = form.save()
-        if getattr(settings, "EMAIL_HOST", "") and getattr(settings, "DEFAULT_FROM_EMAIL", ""):
-            send_mail(
-                subject=f"New TIPKODES TECH LAB message: {message.subject}",
-                message=f"From: {message.name} <{message.email}>\n\n{message.message}",
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[settings.DEFAULT_FROM_EMAIL],
-                fail_silently=True,
+        contact_message = form.save()
+        from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "") or getattr(settings, "EMAIL_HOST_USER", "")
+        recipient = getattr(settings, "CONTACT_RECIPIENT_EMAIL", "") or from_email
+
+        if getattr(settings, "EMAIL_HOST", "") and from_email and recipient:
+            try:
+                email = EmailMessage(
+                    subject=f"New TIPKODES TECH LAB message: {contact_message.subject}",
+                    body=(
+                        f"From: {contact_message.name} <{contact_message.email}>\n\n"
+                        f"{contact_message.message}"
+                    ),
+                    from_email=from_email,
+                    to=[recipient],
+                    reply_to=[contact_message.email],
+                )
+                email.send(fail_silently=False)
+                messages.success(request, "Your message was sent successfully. I will get back to you soon.")
+            except Exception:
+                logger.exception("Contact email delivery failed for message %s", contact_message.pk)
+                messages.warning(
+                    request,
+                    "Your message was saved, but the email could not be sent. Please check the email settings.",
+                )
+        else:
+            messages.warning(
+                request,
+                "Your message was saved, but email sending is not configured yet.",
             )
-        messages.success(request, "Your message has been saved. I will get back to you soon.")
         return redirect("contact")
     return render(request, "contact.html", {"form": form, "profile": Profile.objects.order_by("-updated_at").first()})
 
