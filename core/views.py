@@ -21,6 +21,7 @@ from .models import (
     Certificate,
     CloudPost,
     CyberFinding,
+    DeploymentEntry,
     ExternalProfile,
     GalleryImage,
     NewsletterSubscription,
@@ -417,15 +418,27 @@ def integrations(request):
 
 
 def deployment(request):
-    stack = [
-        ("Backend", "Django with SQLite development and PostgreSQL-ready DATABASE_URL."),
-        ("Frontend", "Bootstrap 5, custom CSS, JavaScript animations, responsive templates."),
-        ("Content", "Django Admin manages projects, findings, blogs, gallery, videos, certificates, skills, comments, testimonials, and timeline."),
-        ("Security", "CSRF protection, upload validators, environment secrets, secure-cookie production switches, and custom errors."),
-        ("Media", "Local media first with Cloudinary-ready environment variables."),
-        ("Deployment", "Whitenoise static files, Gunicorn, PostgreSQL driver, HTTPS/HSTS environment controls."),
+    entries = DeploymentEntry.objects.filter(is_active=True)
+    architecture = entries.filter(section=DeploymentEntry.Section.ARCHITECTURE)
+    checklist = entries.filter(section=DeploymentEntry.Section.CHECKLIST)
+    targets = entries.filter(section=DeploymentEntry.Section.TARGET)
+    fallback_architecture = [
+        {"title": "Backend", "description": "Django with SQLite development and PostgreSQL-ready DATABASE_URL.", "icon": ""},
+        {"title": "Frontend", "description": "Bootstrap 5, custom CSS, JavaScript animations, responsive templates.", "icon": ""},
+        {"title": "Content", "description": "Django Admin manages projects, findings, blogs, gallery, videos, certificates, skills, comments, testimonials, and timeline.", "icon": ""},
+        {"title": "Security", "description": "CSRF protection, upload validators, environment secrets, secure-cookie production switches, and custom errors.", "icon": ""},
+        {"title": "Media", "description": "Local media first with Cloudinary-ready environment variables.", "icon": ""},
+        {"title": "Deployment", "description": "Whitenoise static files, Gunicorn, PostgreSQL driver, HTTPS/HSTS environment controls.", "icon": ""},
     ]
-    return render(request, "deployment.html", {"stack": stack})
+    return render(
+        request,
+        "deployment.html",
+        {
+            "architecture_entries": architecture or fallback_architecture,
+            "checklist_entries": checklist,
+            "target_entries": targets,
+        },
+    )
 
 
 def subscribe_newsletter(request):

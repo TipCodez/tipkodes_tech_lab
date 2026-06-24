@@ -5,21 +5,30 @@
 <section class="section-pad">
   <div class="container">
     <div class="architecture-grid">
-      {% for title, description in stack %}
+      {% for entry in architecture_entries %}
         <article class="glass-card architecture-card reveal">
-          <h2>{{ title }}</h2>
-          <p>{{ description }}</p>
+          {% if entry.icon %}<i class="bi {{ entry.icon }}"></i>{% endif %}
+          <h2>{{ entry.title }}</h2>
+          <p>{{ entry.description }}</p>
         </article>
       {% endfor %}
     </div>
     <div class="content-stack mt-4">
       <section>
         <h2>Production Checklist</h2>
-        <p>Set a strong SECRET_KEY, configure ALLOWED_HOSTS, connect PostgreSQL through DATABASE_URL, run collectstatic, enable HTTPS, configure SECURE_SSL_REDIRECT and HSTS after SSL is confirmed, and move media to Cloudinary or another durable object store.</p>
+        {% for entry in checklist_entries %}
+          <p><strong>{{ entry.title }}:</strong> {{ entry.description }}</p>
+        {% empty %}
+          <p>Set a strong SECRET_KEY, configure ALLOWED_HOSTS, connect PostgreSQL through DATABASE_URL, run collectstatic, enable HTTPS, configure SECURE_SSL_REDIRECT and HSTS after SSL is confirmed, and move media to Cloudinary or another durable object store.</p>
+        {% endfor %}
       </section>
       <section>
         <h2>Deployment Targets</h2>
-        <p>The project is ready to adapt for Koyeb, Render, PythonAnywhere, VPS hosting, or any platform that supports Django, Gunicorn, PostgreSQL, environment variables, and static file serving.</p>
+        {% for entry in target_entries %}
+          <p><strong>{{ entry.title }}:</strong> {{ entry.description }}</p>
+        {% empty %}
+          <p>The project is ready to adapt for Koyeb, Render, PythonAnywhere, VPS hosting, or any platform that supports Django, Gunicorn, PostgreSQL, environment variables, and static file serving.</p>
+        {% endfor %}
       </section>
     </div>
   </div>

@@ -334,6 +334,27 @@ class ExternalProfile(TimeStampedModel):
         return f"{self.get_platform_display()} - {self.display_name}"
 
 
+class DeploymentEntry(TimeStampedModel):
+    class Section(models.TextChoices):
+        ARCHITECTURE = "architecture", "Architecture Card"
+        CHECKLIST = "checklist", "Production Checklist"
+        TARGET = "target", "Deployment Target"
+
+    section = models.CharField(max_length=30, choices=Section.choices, default=Section.ARCHITECTURE)
+    title = models.CharField(max_length=160)
+    description = models.TextField()
+    icon = models.CharField(max_length=80, blank=True, help_text="Optional Bootstrap Icon class, e.g. bi-cloud-check.")
+    sort_order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["section", "sort_order", "title"]
+        verbose_name_plural = "Deployment entries"
+
+    def __str__(self):
+        return f"{self.get_section_display()} - {self.title}"
+
+
 class Skill(TimeStampedModel):
     class Level(models.TextChoices):
         BEGINNER = "Beginner", "Beginner"

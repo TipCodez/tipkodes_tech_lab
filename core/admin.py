@@ -9,6 +9,7 @@ from .models import (
     CloudPost,
     ContactMessage,
     CyberFinding,
+    DeploymentEntry,
     ExternalProfile,
     GalleryImage,
     NewsletterSubscription,
@@ -177,6 +178,15 @@ class ExternalProfileAdmin(admin.ModelAdmin):
     list_filter = ("platform", "is_active")
     search_fields = ("display_name", "username", "headline", "profile_url")
     readonly_fields = ("created_at", "updated_at")
+
+
+@admin.register(DeploymentEntry)
+class DeploymentEntryAdmin(admin.ModelAdmin):
+    list_display = ("title", "section", "sort_order", "is_active", "updated_at")
+    list_filter = ("section", "is_active")
+    search_fields = ("title", "description", "icon")
+    readonly_fields = ("created_at", "updated_at")
+    list_editable = ("sort_order", "is_active")
 
 
 @admin.register(Skill)

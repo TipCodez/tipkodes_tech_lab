@@ -413,6 +413,7 @@ h1, h2, h3 { letter-spacing: 0; }
 .testimonial-card p, .architecture-card p, .timeline-item p { color: var(--muted); line-height: 1.75; }
 .testimonial-card h2, .architecture-card h2, .timeline-item h2 { font-size: 1.2rem; font-weight: 900; margin: 0.8rem 0 0.25rem; }
 .testimonial-card span, .timeline-item span { color: var(--green); font-weight: 800; font-size: 0.9rem; }
+.architecture-card > i { color: var(--cyan); font-size: 1.75rem; }
 .timeline-list { position: relative; display: grid; gap: 1rem; }
 .timeline-item {
   display: grid;
