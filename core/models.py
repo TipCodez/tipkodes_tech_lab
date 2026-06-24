@@ -57,9 +57,13 @@ class Profile(TimeStampedModel):
     phone = models.CharField(max_length=40, blank=True)
     location = models.CharField(max_length=120, blank=True)
     github = models.URLField(blank=True)
+    facebook = models.URLField(blank=True)
+    tiktok = models.URLField(blank=True)
     linkedin = models.URLField(blank=True)
+    instagram = models.URLField(blank=True)
+    snapchat = models.URLField(blank=True)
     whatsapp = models.URLField(blank=True)
-    twitter = models.URLField(blank=True)
+    twitter = models.URLField(blank=True, verbose_name="X / Twitter")
 
     def __str__(self):
         return self.full_name

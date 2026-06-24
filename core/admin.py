@@ -42,7 +42,8 @@ class ProfileAdmin(admin.ModelAdmin):
     fieldsets = (
         ("Identity", {"fields": ("full_name", "professional_title", "tagline", "short_bio", "profile_photo")}),
         ("Story", {"fields": ("biography", "education", "technology_journey", "cybersecurity_journey", "python_journey", "cloud_journey", "career_goals", "tools_used", "mission")}),
-        ("Contact", {"fields": ("email", "phone", "location", "github", "linkedin", "whatsapp", "twitter")}),
+        ("Contact", {"fields": ("email", "phone", "location")}),
+        ("Social Media", {"fields": ("github", "facebook", "tiktok", "linkedin", "twitter", "instagram", "snapchat", "whatsapp")}),
         ("Dates", {"fields": ("created_at", "updated_at")}),
     )
 

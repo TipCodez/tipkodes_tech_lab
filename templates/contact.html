@@ -3,7 +3,28 @@
 {% block content %}
 {% include "page_header.html" with page_title="Contact" page_subtitle="Send a message, ask a question, or connect for collaboration." %}
 <section class="section-pad"><div class="container"><div class="row g-4">
-  <div class="col-lg-5"><div class="glass-card side-panel"><h2>Contact Details</h2><dl><dt>Email</dt><dd>{{ profile.email|default:"Add email in Admin" }}</dd><dt>Location</dt><dd>{{ profile.location|default:"Add location in Admin" }}</dd><dt>GitHub</dt><dd>{% if profile.github %}<a href="{{ profile.github }}">{{ profile.github }}</a>{% else %}Not set{% endif %}</dd><dt>LinkedIn</dt><dd>{% if profile.linkedin %}<a href="{{ profile.linkedin }}">{{ profile.linkedin }}</a>{% else %}Not set{% endif %}</dd></dl></div></div>
+  <div class="col-lg-5">
+    <div class="glass-card side-panel">
+      <h2>Contact Details</h2>
+      <dl>
+        <dt>Email</dt>
+        <dd>{{ profile.email|default:"Add email in Admin" }}</dd>
+        <dt>Location</dt>
+        <dd>{{ profile.location|default:"Add location in Admin" }}</dd>
+        <dt>Social Media</dt>
+        <dd class="contact-socials">
+          {% if profile.github %}<a href="{{ profile.github }}" target="_blank" rel="noopener"><i class="bi bi-github"></i> GitHub</a>{% endif %}
+          {% if profile.facebook %}<a href="{{ profile.facebook }}" target="_blank" rel="noopener"><i class="bi bi-facebook"></i> Facebook</a>{% endif %}
+          {% if profile.tiktok %}<a href="{{ profile.tiktok }}" target="_blank" rel="noopener"><i class="bi bi-tiktok"></i> TikTok</a>{% endif %}
+          {% if profile.linkedin %}<a href="{{ profile.linkedin }}" target="_blank" rel="noopener"><i class="bi bi-linkedin"></i> LinkedIn</a>{% endif %}
+          {% if profile.twitter %}<a href="{{ profile.twitter }}" target="_blank" rel="noopener"><i class="bi bi-twitter-x"></i> X</a>{% endif %}
+          {% if profile.instagram %}<a href="{{ profile.instagram }}" target="_blank" rel="noopener"><i class="bi bi-instagram"></i> Instagram</a>{% endif %}
+          {% if profile.snapchat %}<a href="{{ profile.snapchat }}" target="_blank" rel="noopener"><i class="bi bi-snapchat"></i> Snapchat</a>{% endif %}
+          {% if profile.whatsapp %}<a href="{{ profile.whatsapp }}" target="_blank" rel="noopener"><i class="bi bi-whatsapp"></i> WhatsApp</a>{% endif %}
+        </dd>
+      </dl>
+    </div>
+  </div>
   <div class="col-lg-7"><form class="contact-form glass-card" method="post">{% csrf_token %}{% for field in form %}<label>{{ field.label }}{{ field }}</label>{% if field.errors %}<div class="form-error">{{ field.errors|join:", " }}</div>{% endif %}{% endfor %}<button class="btn btn-lab" type="submit"><i class="bi bi-send"></i> Send Message</button></form></div>
 </div></div></section>
 {% endblock %}
