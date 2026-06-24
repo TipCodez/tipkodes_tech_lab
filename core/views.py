@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator
 from django.core.mail import EmailMessage
+from django.core.mail import get_connection
 from django.db.models import Count, Q
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
@@ -371,6 +372,7 @@ def contact(request):
 
         if getattr(settings, "EMAIL_HOST", "") and from_email and recipient:
             try:
+                connection = get_connection(timeout=getattr(settings, "EMAIL_TIMEOUT", 8))
                 email = EmailMessage(
                     subject=f"New TIPKODES TECH LAB message: {contact_message.subject}",
                     body=(
@@ -380,10 +382,11 @@ def contact(request):
                     from_email=from_email,
                     to=[recipient],
                     reply_to=[contact_message.email],
+                    connection=connection,
                 )
                 email.send(fail_silently=False)
                 messages.success(request, "Your message was sent successfully. I will get back to you soon.")
-            except Exception:
+            except BaseException:
                 logger.exception("Contact email delivery failed for message %s", contact_message.pk)
                 messages.warning(
                     request,
