@@ -620,6 +620,58 @@ h1, h2, h3 { letter-spacing: 0; }
 .hljs-symbol, .hljs-bullet, .hljs-meta { color: #ffcb6b !important; }
 .hljs-function, .hljs-class .hljs-title { color: #82aaff !important; }
 .hljs-doctag, .hljs-type { color: #ffcb6b !important; }
+.command-output-wrap {
+  margin: 0.85rem 0 1.25rem;
+  border: 1px solid rgba(0, 255, 136, 0.2);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: #050816;
+  box-shadow: var(--shadow);
+}
+.command-output-label {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.65rem 0.85rem;
+  border-bottom: 1px solid rgba(0, 255, 136, 0.18);
+  background: rgba(0, 255, 136, 0.08);
+  color: var(--green);
+  font-weight: 900;
+  font-size: 0.85rem;
+}
+.command-output {
+  margin: 0;
+  padding: 1rem;
+  overflow: auto;
+  color: #d6deeb;
+  background: transparent;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  white-space: pre;
+}
+.command-screenshot {
+  margin: 0.9rem 0 1.35rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+.command-screenshot img {
+  display: block;
+  width: 100%;
+  max-height: 34rem;
+  object-fit: contain;
+  background: #050816;
+}
+.command-screenshot figcaption {
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-weight: 800;
+  font-size: 0.9rem;
+}
 .article-insight {
   margin-bottom: 1.25rem;
   padding: 1.25rem;

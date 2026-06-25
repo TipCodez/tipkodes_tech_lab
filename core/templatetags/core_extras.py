@@ -48,15 +48,15 @@ def highlight(value, term, autoescape=True):
 @register.filter
 def render_blog_content(value):
     text = "" if value is None else str(value)
-    code_blocks = []
+    special_blocks = []
 
     def stash_code(match):
         language = (match.group(1) or "plaintext").strip().lower()
         aliases = {"django": "django", "html": "xml", "shell": "bash", "sh": "bash", "py": "python"}
         language = aliases.get(language, language)
         code = escape(match.group(2).strip("\r\n"))
-        token = f"@@CODE_BLOCK_{len(code_blocks)}@@"
-        code_blocks.append(
+        token = f"@@SPECIAL_BLOCK_{len(special_blocks)}@@"
+        special_blocks.append(
             '<div class="code-block-wrap">'
             '<button class="code-copy-btn" type="button" aria-label="Copy code" title="Copy code">'
             '<i class="bi bi-copy"></i><span class="visually-hidden">Copy code</span>'
@@ -68,9 +68,41 @@ def render_blog_content(value):
 
     fence_pattern = r"```[ \t]*([A-Za-z0-9_-]+)?[ \t]*(?:\r?\n)(.*?)(?:\r?\n)?```"
     without_code = re.sub(fence_pattern, stash_code, text, flags=re.DOTALL)
+
+    def stash_output(match):
+        output = escape(match.group(1).strip("\r\n"))
+        token = f"@@SPECIAL_BLOCK_{len(special_blocks)}@@"
+        special_blocks.append(
+            '<div class="command-output-wrap">'
+            '<div class="command-output-label"><i class="bi bi-terminal"></i> Output</div>'
+            f'<pre class="command-output">{output}</pre>'
+            '</div>'
+        )
+        return token
+
+    without_code = re.sub(r":::[ \t]*output[ \t]*(?:\r?\n)(.*?)(?:\r?\n)?:::", stash_output, without_code, flags=re.DOTALL | re.IGNORECASE)
+
+    def stash_screenshot(match):
+        body = match.group(1).strip()
+        lines = [line.strip() for line in body.splitlines() if line.strip()]
+        if not lines:
+            return ""
+        image_url = escape(lines[0])
+        caption = escape(" ".join(lines[1:])) if len(lines) > 1 else "Command screenshot"
+        token = f"@@SPECIAL_BLOCK_{len(special_blocks)}@@"
+        special_blocks.append(
+            '<figure class="command-screenshot">'
+            f'<img src="{image_url}" alt="{caption}">'
+            f'<figcaption>{caption}</figcaption>'
+            '</figure>'
+        )
+        return token
+
+    without_code = re.sub(r":::[ \t]*screenshot[ \t]*(?:\r?\n)(.*?)(?:\r?\n)?:::", stash_screenshot, without_code, flags=re.DOTALL | re.IGNORECASE)
+
     html = linebreaks(escape(without_code))
-    for index, block in enumerate(code_blocks):
-        token = f"@@CODE_BLOCK_{index}@@"
+    for index, block in enumerate(special_blocks):
+        token = f"@@SPECIAL_BLOCK_{index}@@"
         html = html.replace(f"<p>{token}</p>", block)
         html = html.replace(token, block)
     return mark_safe(html)
