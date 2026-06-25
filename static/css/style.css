@@ -597,14 +597,17 @@ h1, h2, h3 { letter-spacing: 0; }
   top: 0.65rem;
   right: 0.65rem;
   z-index: 2;
-  min-height: 2rem;
-  padding: 0 0.7rem;
+  width: 2.15rem;
+  height: 2.15rem;
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
   border: 1px solid rgba(214, 222, 235, 0.22);
   border-radius: 7px;
   background: rgba(31, 41, 55, 0.9);
   color: #d6deeb;
   font-weight: 850;
-  font-size: 0.78rem;
+  font-size: 1rem;
 }
 .code-copy-btn:hover { border-color: var(--cyan); color: var(--cyan); }
 .code-copy-btn:disabled { opacity: 0.75; cursor: default; }

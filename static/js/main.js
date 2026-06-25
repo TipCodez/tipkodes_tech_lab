@@ -216,6 +216,7 @@
       const code = wrapper ? wrapper.querySelector("code") : null;
       if (!code) return;
       const text = code.textContent || "";
+      const originalHtml = button.innerHTML;
       try {
         if (navigator.clipboard && window.isSecureContext) {
           await navigator.clipboard.writeText(text);
@@ -224,23 +225,34 @@
           textarea.value = text;
           textarea.setAttribute("readonly", "");
           textarea.style.position = "fixed";
-          textarea.style.opacity = "0";
+          textarea.style.top = "-1000px";
+          textarea.style.left = "-1000px";
           document.body.appendChild(textarea);
+          textarea.focus();
           textarea.select();
-          document.execCommand("copy");
+          textarea.setSelectionRange(0, textarea.value.length);
+          const copied = document.execCommand("copy");
           textarea.remove();
+          if (!copied) throw new Error("Copy command failed");
         }
-        const previous = button.textContent;
-        button.textContent = "Copied";
+        button.innerHTML = '<i class="bi bi-check2"></i><span class="visually-hidden">Copied</span>';
+        button.setAttribute("aria-label", "Copied");
+        button.setAttribute("title", "Copied");
         button.disabled = true;
         setTimeout(() => {
-          button.textContent = previous;
+          button.innerHTML = originalHtml;
+          button.setAttribute("aria-label", "Copy code");
+          button.setAttribute("title", "Copy code");
           button.disabled = false;
         }, 1400);
       } catch (error) {
-        button.textContent = "Copy failed";
+        button.innerHTML = '<i class="bi bi-exclamation-triangle"></i><span class="visually-hidden">Copy failed</span>';
+        button.setAttribute("aria-label", "Copy failed");
+        button.setAttribute("title", "Copy failed");
         setTimeout(() => {
-          button.textContent = "Copy";
+          button.innerHTML = originalHtml;
+          button.setAttribute("aria-label", "Copy code");
+          button.setAttribute("title", "Copy code");
         }, 1400);
       }
     });

@@ -58,7 +58,9 @@ def render_blog_content(value):
         token = f"@@CODE_BLOCK_{len(code_blocks)}@@"
         code_blocks.append(
             '<div class="code-block-wrap">'
-            '<button class="code-copy-btn" type="button">Copy</button>'
+            '<button class="code-copy-btn" type="button" aria-label="Copy code" title="Copy code">'
+            '<i class="bi bi-copy"></i><span class="visually-hidden">Copy code</span>'
+            '</button>'
             f'<pre class="code-block"><code class="language-{escape(language)}">{code}</code></pre>'
             '</div>'
         )
