@@ -1,4 +1,4 @@
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlparse
 import re
 
 from django import template
@@ -99,6 +99,51 @@ def render_blog_content(value):
         return token
 
     without_code = re.sub(r":::[ \t]*screenshot[ \t]*(?:\r?\n)(.*?)(?:\r?\n)?:::", stash_screenshot, without_code, flags=re.DOTALL | re.IGNORECASE)
+
+    def parse_embed_lines(body):
+        data = {}
+        plain_lines = []
+        for raw_line in body.splitlines():
+            line = raw_line.strip()
+            if not line:
+                continue
+            key, separator, value = line.partition(":")
+            normalized_key = key.strip().lower()
+            if separator and normalized_key in {"url", "title", "description", "label"}:
+                data[normalized_key] = value.strip()
+            else:
+                plain_lines.append(line)
+        if plain_lines:
+            data.setdefault("url", plain_lines[0])
+        if len(plain_lines) > 1:
+            data.setdefault("title", plain_lines[1])
+        if len(plain_lines) > 2:
+            data.setdefault("description", " ".join(plain_lines[2:]))
+        return data
+
+    def stash_link(match):
+        data = parse_embed_lines(match.group(1).strip())
+        raw_url = data.get("url", "")
+        parsed = urlparse(raw_url)
+        if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+            return ""
+        title = data.get("title") or parsed.netloc
+        description = data.get("description") or raw_url
+        label = data.get("label") or "Open resource"
+        token = f"@@SPECIAL_BLOCK_{len(special_blocks)}@@"
+        special_blocks.append(
+            f'<a class="blog-link-embed" href="{escape(raw_url)}" target="_blank" rel="noopener noreferrer">'
+            '<span class="blog-link-embed-icon"><i class="bi bi-link-45deg"></i></span>'
+            '<span class="blog-link-embed-copy">'
+            f'<strong>{escape(title)}</strong>'
+            f'<small>{escape(description)}</small>'
+            '</span>'
+            f'<span class="blog-link-embed-action">{escape(label)} <i class="bi bi-box-arrow-up-right"></i></span>'
+            '</a>'
+        )
+        return token
+
+    without_code = re.sub(r":::[ \t]*link[ \t]*(?:\r?\n)(.*?)(?:\r?\n)?:::", stash_link, without_code, flags=re.DOTALL | re.IGNORECASE)
 
     html = linebreaks(escape(without_code))
     for index, block in enumerate(special_blocks):
