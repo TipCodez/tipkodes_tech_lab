@@ -104,6 +104,13 @@ def _local_response(question, context):
             "conversational-fallback",
         )
 
+    if normalized in {"hmm", "hm", "okay", "ok", "alright", "wow"}:
+        return AIResponse(
+            "I am here with you. You can ask me things like: what projects has Raphael built, what skills does he have, what cybersecurity findings are available, show me Python content, show cloud content, list videos, or how can I contact him.",
+            "local",
+            "conversational-fallback",
+        )
+
     correction_phrases = ["wrong", "not correct", "incorrect", "no that", "nope", "that is not", "that's not"]
     if any(phrase in normalized for phrase in correction_phrases):
         return AIResponse(
@@ -125,39 +132,82 @@ def _local_response(question, context):
             return AIResponse(f"You can connect through the contact page. {contact_lines[0]}", "local", "conversational-fallback")
         return AIResponse("You can use the contact page to send Raphael a message directly.", "local", "conversational-fallback")
 
+    compact = normalized.replace(" ", "")
+    lab_intent = "lab" in normalized or "labs" in normalized or "available" in normalized
+    if lab_intent:
+        sections = [
+            ("Projects", "Project:"),
+            ("Cybersecurity findings", "Cyber finding:"),
+            ("Python posts", "Python:"),
+            ("Cloud posts", "Cloud:"),
+            ("Videos", "Video:"),
+            ("Certificates", "Certificate:"),
+            ("Skills", "Skill:"),
+            ("Career tracks", "Career track:"),
+        ]
+        available = []
+        for label, prefix in sections:
+            total = sum(1 for line in lines if line.startswith(prefix))
+            available.append(f"- {label}: {total} item(s)")
+        return AIResponse("These lab areas are available on TIPKODES TECH LAB:\n" + "\n".join(available), "local", "conversational-fallback")
+
+    explicit_topics = [
+        (
+            ("project", "projects", "built", "build", "created", "developed", "portfolio platform"),
+            "Project:",
+            "Here are projects Raphael has built or documented on TIPKODES TECH LAB:",
+            "I do not see project records available in the site context yet. Once projects are added in Admin, I can list them here with descriptions, technologies, and status.",
+        ),
+        (
+            ("finding", "findings", "vulnerability", "vulnerabilities", "cybersecurity finding"),
+            "Cyber finding:",
+            "Here are cybersecurity findings or notes from the lab:",
+            "I do not see public cybersecurity finding records yet. Once findings are added in Admin and marked public, I can list them here.",
+        ),
+        (
+            ("certificate", "certificates", "certification", "certifications", "certif"),
+            "Certificate:",
+            "Here are certificates listed on the site:",
+            "I do not see certificate records yet. Once certificates are added in Admin, I can list them here with issuer and credential details.",
+        ),
+        (
+            ("skill", "skills"),
+            "Skill:",
+            "Here are some skills listed on the site:",
+            "I do not see skill records yet. Once skills are added in Admin, I can list them here.",
+        ),
+        (
+            ("python",),
+            "Python:",
+            "Here are Python-related entries:",
+            "I do not see Python content records yet. Once Python posts are added in Admin, I can list them here.",
+        ),
+        (
+            ("cloud", "aws"),
+            "Cloud:",
+            "Here are cloud computing entries:",
+            "I do not see cloud content records yet. Once cloud posts are added in Admin, I can list them here.",
+        ),
+        (
+            ("video", "videos", "youtube"),
+            "Video:",
+            "Here are videos from the lab:",
+            "I do not see video records yet. Once videos are added in Admin, I can list them here.",
+        ),
+    ]
+    for keywords, prefix, intro, empty_message in explicit_topics:
+        if any(keyword in normalized or keyword in compact for keyword in keywords):
+            topic_lines = [line for line in lines if line.startswith(prefix)]
+            if topic_lines:
+                answer = "\n".join(f"- {line}" for line in topic_lines[:6])
+                return AIResponse(f"{intro}\n{answer}", "local", "conversational-fallback")
+            return AIResponse(empty_message, "local", "conversational-fallback")
+
     topic_map = {
-        "project": ("Project:", "Here are some projects from TIPKODES TECH LAB:"),
-        "skill": ("Skill:", "Here are some skills listed on the site:"),
-        "cyber": ("Cyber finding:", "Here are cybersecurity findings or notes from the lab:"),
-        "finding": ("Cyber finding:", "Here are cybersecurity findings or notes from the lab:"),
-        "python": ("Python:", "Here are Python-related entries:"),
-        "cloud": ("Cloud:", "Here are cloud computing entries:"),
-        "video": ("Video:", "Here are videos from the lab:"),
-        "certificate": ("Certificate:", "Here are certificates listed on the site:"),
         "resume": ("Resume summary:", "Here is the resume summary:"),
         "about": ("Profile:", "Here is Raphael's profile summary:"),
         "raphael": ("Profile:", "Here is Raphael's profile summary:"),
     }
-    project_intent = (
-        "project" in normalized
-        or "projects" in normalized
-        or "built" in normalized
-        or "build" in normalized
-        or "created" in normalized
-        or "developed" in normalized
-        or "portfolio platform" in normalized
-    )
-    if project_intent:
-        project_lines = [line for line in lines if line.startswith("Project:")]
-        if project_lines:
-            answer = "\n".join(f"- {line}" for line in project_lines[:6])
-            return AIResponse(f"Here are projects Raphael has built or documented on TIPKODES TECH LAB:\n{answer}", "local", "conversational-fallback")
-        return AIResponse(
-            "I do not see project records available in the site context yet. Once projects are added in Admin, I can list them here with their descriptions, technologies, and status.",
-            "local",
-            "conversational-fallback",
-        )
-
     for keyword, (prefix, intro) in topic_map.items():
         if keyword in normalized:
             topic_lines = [line for line in lines if line.startswith(prefix)]
@@ -171,9 +221,9 @@ def _local_response(question, context):
         if score:
             matches.append((score, line))
     matches.sort(reverse=True)
-    if not matches:
+    if not matches or matches[0][0] < 2:
         return AIResponse(
-            "I could not find a strong match in the site content yet. Try asking about projects, skills, cybersecurity findings, Python, cloud, certificates, videos, or contact details.",
+            "I am not fully sure what you want me to open. Try asking: projects Raphael has built, available labs, cybersecurity findings, certificates, Python content, cloud content, videos, skills, resume, or contact details.",
             "local",
             "keyword-fallback",
         )
