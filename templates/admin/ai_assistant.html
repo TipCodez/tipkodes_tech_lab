@@ -105,11 +105,33 @@
   .ai-field textarea {
     width: 100%;
     box-sizing: border-box;
-    border: 1px solid var(--border-color);
+    border: 1px solid #3b4658;
     border-radius: 8px;
     padding: 12px 13px;
-    background: var(--body-bg);
-    color: var(--body-fg);
+    background: #ffffff;
+    color: #111827;
+    caret-color: #111827;
+  }
+  .ai-field select option {
+    background: #ffffff;
+    color: #111827;
+  }
+  .ai-field input::placeholder,
+  .ai-field textarea::placeholder {
+    color: #6b7280;
+    opacity: 1;
+  }
+  .ai-field select:focus,
+  .ai-field input:focus,
+  .ai-field textarea:focus {
+    border-color: var(--ai-cyan);
+    box-shadow: 0 0 0 3px rgba(0, 212, 255, .18);
+    outline: 0;
+  }
+  .ai-field input:disabled {
+    background: #e5e7eb;
+    color: #374151;
+    opacity: 1;
   }
   .ai-field textarea {
     min-height: 180px;
