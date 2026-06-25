@@ -3,8 +3,43 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
 from django.utils.text import slugify
+from urllib.parse import parse_qs, urlparse
 
 from .validators import validate_image_file, validate_pdf_file
+
+
+def normalize_youtube_embed_url(url):
+    if not url:
+        return url
+    parsed = urlparse(url.strip())
+    host = parsed.netloc.lower().replace("www.", "").replace("m.", "")
+    path_parts = [part for part in parsed.path.split("/") if part]
+    query = parse_qs(parsed.query)
+
+    if "youtube-nocookie.com" in host and path_parts[:1] == ["embed"]:
+        return url.strip()
+
+    if "youtu.be" in host and path_parts:
+        return f"https://www.youtube.com/embed/{path_parts[0]}"
+
+    if "youtube.com" not in host:
+        return url.strip()
+
+    if path_parts[:1] == ["embed"] and len(path_parts) > 1:
+        return f"https://www.youtube.com/embed/{path_parts[1]}"
+
+    if path_parts[:1] in (["shorts"], ["live"]) and len(path_parts) > 1:
+        return f"https://www.youtube.com/embed/{path_parts[1]}"
+
+    video_id = query.get("v", [""])[0]
+    if video_id:
+        return f"https://www.youtube.com/embed/{video_id}"
+
+    playlist_id = query.get("list", [""])[0]
+    if playlist_id:
+        return f"https://www.youtube.com/embed/videoseries?list={playlist_id}"
+
+    return url.strip()
 
 
 class TimeStampedModel(models.Model):
@@ -335,6 +370,11 @@ class ExternalProfile(TimeStampedModel):
     class Meta:
         ordering = ["platform", "display_name"]
 
+    def save(self, *args, **kwargs):
+        if self.platform == self.Platform.YOUTUBE and self.embed_url:
+            self.embed_url = normalize_youtube_embed_url(self.embed_url)
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"{self.get_platform_display()} - {self.display_name}"
 
@@ -446,6 +486,10 @@ class Video(SluggedModel):
 
     class Meta:
         ordering = ["-featured", "-published_date", "-created_at"]
+
+    def save(self, *args, **kwargs):
+        self.youtube_embed_url = normalize_youtube_embed_url(self.youtube_embed_url)
+        super().save(*args, **kwargs)
 
     def get_absolute_url(self):
         return reverse("video_detail", kwargs={"slug": self.slug})

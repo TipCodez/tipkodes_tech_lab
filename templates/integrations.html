@@ -20,7 +20,7 @@
               <a class="card-link" href="{{ profile.profile_url }}" target="_blank" rel="noopener">Open profile <i class="bi bi-arrow-right"></i></a>
             </div>
             {% if profile.embed_url %}
-              <div class="video-embed"><iframe src="{{ profile.embed_url }}" title="{{ profile.display_name }}" allowfullscreen></iframe></div>
+              <div class="video-embed"><iframe src="{{ profile.embed_url }}" title="{{ profile.display_name }}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
             {% endif %}
           </article>
         </div>
