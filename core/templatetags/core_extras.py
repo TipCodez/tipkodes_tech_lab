@@ -145,6 +145,31 @@ def render_blog_content(value):
 
     without_code = re.sub(r":::[ \t]*link[ \t]*(?:\r?\n)(.*?)(?:\r?\n)?:::", stash_link, without_code, flags=re.DOTALL | re.IGNORECASE)
 
+    def stash_heading(match):
+        marks = match.group(1)
+        title = match.group(2).strip()
+        level = min(max(len(marks), 2), 4)
+        token = f"@@SPECIAL_BLOCK_{len(special_blocks)}@@"
+        classes = {
+            2: "blog-section-heading",
+            3: "blog-subsection-heading",
+            4: "blog-note-heading",
+        }
+        icons = {
+            2: "bi-bookmark-star",
+            3: "bi-chevron-right",
+            4: "bi-dot",
+        }
+        special_blocks.append(
+            f'<h{level} class="{classes[level]}">'
+            f'<i class="bi {icons[level]}"></i>'
+            f'<span>{escape(title)}</span>'
+            f'</h{level}>'
+        )
+        return token
+
+    without_code = re.sub(r"(?m)^[ \t]*(#{1,4})[ \t]+(.+?)[ \t]*$", stash_heading, without_code)
+
     html = linebreaks(escape(without_code))
     for index, block in enumerate(special_blocks):
         token = f"@@SPECIAL_BLOCK_{index}@@"

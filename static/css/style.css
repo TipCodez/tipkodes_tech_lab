@@ -569,6 +569,46 @@ h1, h2, h3 { letter-spacing: 0; }
   margin-bottom: 1.25rem;
 }
 .article-cover img { width: 100%; display: block; aspect-ratio: 16 / 8; object-fit: cover; }
+.article-body .blog-section-heading,
+.article-body .blog-subsection-heading,
+.article-body .blog-note-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  letter-spacing: 0;
+}
+.article-body .blog-section-heading {
+  margin: 2.2rem 0 0.9rem;
+  padding: 0 0 0.7rem;
+  border-bottom: 1px solid rgba(0, 212, 255, 0.28);
+  color: var(--cyan);
+  font-size: clamp(1.45rem, 2vw, 2rem);
+  font-weight: 950;
+}
+.article-body .blog-section-heading i {
+  color: var(--green);
+  font-size: 1.05rem;
+}
+.article-body .blog-subsection-heading {
+  margin: 1.7rem 0 0.65rem;
+  color: var(--green);
+  font-size: 1.18rem;
+  font-weight: 930;
+}
+.article-body .blog-subsection-heading i {
+  color: var(--cyan);
+  font-size: 0.95rem;
+}
+.article-body .blog-note-heading {
+  margin: 1.25rem 0 0.5rem;
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 900;
+}
+.article-body .blog-note-heading i {
+  color: var(--cyan);
+  font-size: 1.1rem;
+}
 .article-body .code-block-wrap {
   position: relative;
   margin: 1.25rem 0;

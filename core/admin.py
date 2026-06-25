@@ -181,6 +181,15 @@ class BlogPostAdmin(admin.ModelAdmin):
             obj.published_date = timezone.now()
         super().save_model(request, obj, form, change)
 
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
+        if db_field.name == "full_content":
+            formfield.help_text = (
+                "Formatting: use ## Section title, ### Subtitle, #### Small heading. "
+                "Use fenced code blocks, :::output, :::screenshot, and :::link blocks for technical posts."
+            )
+        return formfield
+
 
 @admin.action(description="Approve selected comments")
 def approve_comments(modeladmin, request, queryset):
