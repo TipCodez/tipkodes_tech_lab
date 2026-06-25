@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib import admin
+from django.utils import timezone
 
 from .models import (
     AIInteraction,
@@ -145,6 +146,33 @@ class BlogPostAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("title",)}
     filter_horizontal = ("tags",)
     readonly_fields = ("created_at", "updated_at")
+    actions = ["publish_posts", "draft_posts", "archive_posts"]
+
+    @admin.action(description="Publish selected blog posts")
+    def publish_posts(self, request, queryset):
+        updated = 0
+        for post in queryset:
+            post.status = BlogPost.Status.PUBLISHED
+            if not post.published_date:
+                post.published_date = timezone.now()
+            post.save(update_fields=["status", "published_date", "slug", "updated_at"])
+            updated += 1
+        self.message_user(request, f"{updated} blog post(s) published.")
+
+    @admin.action(description="Move selected blog posts to draft")
+    def draft_posts(self, request, queryset):
+        updated = queryset.update(status=BlogPost.Status.DRAFT)
+        self.message_user(request, f"{updated} blog post(s) moved to draft.")
+
+    @admin.action(description="Archive selected blog posts")
+    def archive_posts(self, request, queryset):
+        updated = queryset.update(status=BlogPost.Status.ARCHIVED)
+        self.message_user(request, f"{updated} blog post(s) archived.")
+
+    def save_model(self, request, obj, form, change):
+        if obj.status == BlogPost.Status.PUBLISHED and not obj.published_date:
+            obj.published_date = timezone.now()
+        super().save_model(request, obj, form, change)
 
 
 @admin.action(description="Approve selected comments")
