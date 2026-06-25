@@ -59,6 +59,7 @@ class Profile(TimeStampedModel):
     github = models.URLField(blank=True)
     facebook = models.URLField(blank=True)
     tiktok = models.URLField(blank=True)
+    youtube = models.URLField(blank=True)
     linkedin = models.URLField(blank=True)
     instagram = models.URLField(blank=True)
     snapchat = models.URLField(blank=True)
