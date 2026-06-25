@@ -19,8 +19,9 @@
               </div>
               <a class="card-link" href="{{ profile.profile_url }}" target="_blank" rel="noopener">Open profile <i class="bi bi-arrow-right"></i></a>
             </div>
-            {% if profile.embed_url %}
-              <div class="video-embed"><iframe src="{{ profile.embed_url }}" title="{{ profile.display_name }}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
+            {% if profile.player_embed_url %}
+              <div class="video-embed"><iframe src="{{ profile.player_embed_url }}" title="{{ profile.display_name }}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="origin" allowfullscreen></iframe></div>
+              {% if profile.watch_url %}<div class="card-body pt-0"><a class="card-link" href="{{ profile.watch_url }}" target="_blank" rel="noopener">Watch on YouTube <i class="bi bi-youtube"></i></a></div>{% endif %}
             {% endif %}
           </article>
         </div>

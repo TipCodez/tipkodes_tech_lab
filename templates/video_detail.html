@@ -2,5 +2,5 @@
 {% block title %}{{ video.title }} | TIPKODES TECH LAB{% endblock %}
 {% block content %}
 <section class="detail-hero"><div class="container"><h1>{{ video.title }}</h1><p>{{ video.description }}</p></div></section>
-<section class="section-pad"><div class="container narrow"><div class="video-embed"><iframe src="{{ video.youtube_embed_url }}" title="{{ video.title }}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>{% include "reaction_panel.html" with reaction_model="video" reaction_object=video reaction_summary=reaction_summary %}</div></section>
+<section class="section-pad"><div class="container narrow"><div class="video-embed"><iframe src="{{ video_embed_url }}" title="{{ video.title }}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="origin" allowfullscreen></iframe></div>{% if video_watch_url %}<div class="share-row"><a href="{{ video_watch_url }}" target="_blank" rel="noopener"><i class="bi bi-youtube"></i> Watch video on YouTube</a></div>{% endif %}{% include "reaction_panel.html" with reaction_model="video" reaction_object=video reaction_summary=reaction_summary %}</div></section>
 {% endblock %}

@@ -3,7 +3,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
 from django.utils.text import slugify
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, parse_qsl, urlencode, urlparse, urlunparse
 
 from .validators import validate_image_file, validate_pdf_file
 
@@ -39,6 +39,50 @@ def normalize_youtube_embed_url(url):
     if playlist_id:
         return f"https://www.youtube.com/embed/videoseries?list={playlist_id}"
 
+    return url.strip()
+
+
+def youtube_embed_url_with_origin(url, origin):
+    if not url or not origin:
+        return url
+    parsed = urlparse(url.strip())
+    host = parsed.netloc.lower()
+    if "youtube.com" not in host and "youtube-nocookie.com" not in host:
+        return url.strip()
+
+    params = [(key, value) for key, value in parse_qsl(parsed.query, keep_blank_values=True) if key != "origin"]
+    existing_keys = {key for key, value in params}
+    if "rel" not in existing_keys:
+        params.append(("rel", "0"))
+    if "enablejsapi" not in existing_keys:
+        params.append(("enablejsapi", "1"))
+    params.append(("origin", origin.rstrip("/")))
+    return urlunparse(parsed._replace(query=urlencode(params)))
+
+
+def youtube_watch_url(url):
+    if not url:
+        return ""
+    parsed = urlparse(url.strip())
+    host = parsed.netloc.lower()
+    path_parts = [part for part in parsed.path.split("/") if part]
+    query = parse_qs(parsed.query)
+
+    if "youtu.be" in host and path_parts:
+        return f"https://www.youtube.com/watch?v={path_parts[0]}"
+    if "youtube.com" not in host and "youtube-nocookie.com" not in host:
+        return url.strip()
+    if path_parts[:1] == ["embed"] and len(path_parts) > 1:
+        return f"https://www.youtube.com/watch?v={path_parts[1]}"
+    if path_parts[:1] in (["shorts"], ["live"]) and len(path_parts) > 1:
+        return f"https://www.youtube.com/watch?v={path_parts[1]}"
+
+    video_id = query.get("v", [""])[0]
+    if video_id:
+        return f"https://www.youtube.com/watch?v={video_id}"
+    playlist_id = query.get("list", [""])[0]
+    if playlist_id:
+        return f"https://www.youtube.com/playlist?list={playlist_id}"
     return url.strip()
 
 

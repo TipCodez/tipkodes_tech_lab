@@ -35,6 +35,8 @@ from .models import (
     Testimonial,
     TimelineEvent,
     Video,
+    youtube_embed_url_with_origin,
+    youtube_watch_url,
 )
 
 
@@ -329,7 +331,17 @@ def videos(request):
 
 def video_detail(request, slug):
     video = get_object_or_404(Video, slug=slug)
-    return render(request, "video_detail.html", {"video": video, "reaction_summary": get_reaction_summary(video)})
+    origin = request.build_absolute_uri("/")[:-1]
+    return render(
+        request,
+        "video_detail.html",
+        {
+            "video": video,
+            "video_embed_url": youtube_embed_url_with_origin(video.youtube_embed_url, origin),
+            "video_watch_url": youtube_watch_url(video.youtube_embed_url),
+            "reaction_summary": get_reaction_summary(video),
+        },
+    )
 
 
 def certificates(request):
@@ -413,7 +425,11 @@ def timeline(request):
 
 
 def integrations(request):
-    profiles = ExternalProfile.objects.filter(is_active=True)
+    origin = request.build_absolute_uri("/")[:-1]
+    profiles = list(ExternalProfile.objects.filter(is_active=True))
+    for profile in profiles:
+        profile.player_embed_url = youtube_embed_url_with_origin(profile.embed_url, origin) if profile.embed_url else ""
+        profile.watch_url = youtube_watch_url(profile.embed_url or profile.profile_url)
     return render(request, "integrations.html", {"profiles": profiles})
 
 
