@@ -1,3 +1,4 @@
+from django import forms
 from django.contrib import admin
 
 from .models import (
@@ -34,8 +35,19 @@ admin.site.index_title = "Content Management"
 admin.site.index_template = "admin/index.html"
 
 
+class ProfileAdminForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["profile_photo"].required = False
+
+
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
+    form = ProfileAdminForm
     list_display = ("full_name", "professional_title", "email", "updated_at")
     search_fields = ("full_name", "professional_title", "short_bio")
     readonly_fields = ("created_at", "updated_at")
