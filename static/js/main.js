@@ -205,4 +205,44 @@
       }
     });
   }
+
+  if (window.hljs) {
+    document.querySelectorAll("pre code").forEach((block) => window.hljs.highlightElement(block));
+  }
+
+  document.querySelectorAll(".code-copy-btn").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const wrapper = button.closest(".code-block-wrap");
+      const code = wrapper ? wrapper.querySelector("code") : null;
+      if (!code) return;
+      const text = code.textContent || "";
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          const textarea = document.createElement("textarea");
+          textarea.value = text;
+          textarea.setAttribute("readonly", "");
+          textarea.style.position = "fixed";
+          textarea.style.opacity = "0";
+          document.body.appendChild(textarea);
+          textarea.select();
+          document.execCommand("copy");
+          textarea.remove();
+        }
+        const previous = button.textContent;
+        button.textContent = "Copied";
+        button.disabled = true;
+        setTimeout(() => {
+          button.textContent = previous;
+          button.disabled = false;
+        }, 1400);
+      } catch (error) {
+        button.textContent = "Copy failed";
+        setTimeout(() => {
+          button.textContent = "Copy";
+        }, 1400);
+      }
+    });
+  });
 })();

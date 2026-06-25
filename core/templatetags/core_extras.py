@@ -57,7 +57,10 @@ def render_blog_content(value):
         code = escape(match.group(2).strip("\r\n"))
         token = f"@@CODE_BLOCK_{len(code_blocks)}@@"
         code_blocks.append(
+            '<div class="code-block-wrap">'
+            '<button class="code-copy-btn" type="button">Copy</button>'
             f'<pre class="code-block"><code class="language-{escape(language)}">{code}</code></pre>'
+            '</div>'
         )
         return token
 
