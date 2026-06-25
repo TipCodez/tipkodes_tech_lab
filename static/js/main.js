@@ -122,4 +122,87 @@
       }
     });
   });
+
+  const getCsrfToken = (form) => {
+    const input = form ? form.querySelector("[name=csrfmiddlewaretoken]") : document.querySelector("[name=csrfmiddlewaretoken]");
+    return input ? input.value : "";
+  };
+
+  const appendAiMessage = (log, text, type) => {
+    const message = document.createElement("div");
+    message.className = `ai-message ai-message-${type}`;
+    message.textContent = text;
+    log.appendChild(message);
+    log.scrollTop = log.scrollHeight;
+    return message;
+  };
+
+  const chatPanel = document.getElementById("aiChatPanel");
+  const chatToggle = document.getElementById("aiChatToggle");
+  const chatClose = document.getElementById("aiChatClose");
+  const chatForm = document.getElementById("aiChatForm");
+  const chatLog = document.getElementById("aiChatLog");
+
+  if (chatPanel && chatToggle && chatForm && chatLog) {
+    chatToggle.addEventListener("click", () => {
+      chatPanel.hidden = !chatPanel.hidden;
+      if (!chatPanel.hidden) {
+        const input = chatForm.querySelector("input[name='message']");
+        if (input) input.focus();
+      }
+    });
+    if (chatClose) {
+      chatClose.addEventListener("click", () => {
+        chatPanel.hidden = true;
+      });
+    }
+    chatForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const input = chatForm.querySelector("input[name='message']");
+      const message = input ? input.value.trim() : "";
+      if (!message) return;
+      appendAiMessage(chatLog, message, "user");
+      if (input) input.value = "";
+      const pending = appendAiMessage(chatLog, "Thinking...", "bot");
+      try {
+        const response = await fetch(chatForm.dataset.chatUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCsrfToken(chatForm),
+          },
+          body: JSON.stringify({ message }),
+        });
+        const data = await response.json();
+        pending.textContent = data.answer || data.error || "I could not answer that yet.";
+      } catch (error) {
+        pending.textContent = "The assistant could not connect. Please try again.";
+      }
+    });
+  }
+
+  const aiSearchForm = document.getElementById("aiSearchForm");
+  const aiSearchResult = document.getElementById("aiSearchResult");
+  if (aiSearchForm && aiSearchResult) {
+    aiSearchForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const input = aiSearchForm.querySelector("input[name='q']");
+      const query = input ? input.value.trim() : "";
+      if (!query) return;
+      aiSearchResult.hidden = false;
+      aiSearchResult.textContent = "Thinking...";
+      const formData = new FormData(aiSearchForm);
+      try {
+        const response = await fetch(aiSearchForm.dataset.searchUrl, {
+          method: "POST",
+          body: formData,
+          headers: { "X-Requested-With": "XMLHttpRequest" },
+        });
+        const data = await response.json();
+        aiSearchResult.textContent = data.answer || data.error || "No AI recommendation was returned.";
+      } catch (error) {
+        aiSearchResult.textContent = "AI smart search could not connect. Please try again.";
+      }
+    });
+  }
 })();

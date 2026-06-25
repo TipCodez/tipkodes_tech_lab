@@ -30,5 +30,9 @@ urlpatterns = [
     path("contact/", views.contact, name="contact"),
     path("newsletter/subscribe/", views.subscribe_newsletter, name="subscribe_newsletter"),
     path("react/", views.react_to_content, name="react_to_content"),
+    path("ai/chat/", views.ai_chat, name="ai_chat"),
+    path("ai/search/", views.ai_smart_search, name="ai_smart_search"),
+    path("admin-ai/", views.ai_admin_assistant, name="ai_admin_assistant"),
+    path("admin-ai/contact/<int:message_id>/", views.ai_contact_assist, name="ai_contact_assist"),
     path("search/", views.search_results, name="search_results"),
 ]

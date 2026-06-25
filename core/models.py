@@ -444,6 +444,54 @@ class DeploymentEntry(TimeStampedModel):
         return f"{self.get_section_display()} - {self.title}"
 
 
+class AISettings(TimeStampedModel):
+    class Provider(models.TextChoices):
+        AUTO = "auto", "Auto"
+        GROQ = "groq", "Groq"
+        GEMINI = "gemini", "Gemini"
+        LOCAL = "local", "Local fallback"
+
+    is_enabled = models.BooleanField(default=True)
+    provider = models.CharField(max_length=20, choices=Provider.choices, default=Provider.AUTO)
+    assistant_name = models.CharField(max_length=80, default="TIPKODES AI Assistant")
+    welcome_message = models.CharField(max_length=240, default="Ask me about Raphael, projects, cybersecurity findings, Python, cloud, videos, certificates, or how to connect.")
+    system_prompt = models.TextField(default="You are TIPKODES AI Assistant. Answer from the provided TIPKODES TECH LAB context. Be helpful, concise, honest, and direct users to the contact page when needed.")
+    groq_model = models.CharField(max_length=80, default="llama-3.1-8b-instant")
+    gemini_model = models.CharField(max_length=80, default="gemini-1.5-flash")
+    max_context_items = models.PositiveIntegerField(default=18)
+
+    class Meta:
+        verbose_name = "AI settings"
+        verbose_name_plural = "AI settings"
+
+    def __str__(self):
+        return self.assistant_name
+
+
+class AIInteraction(TimeStampedModel):
+    class Channel(models.TextChoices):
+        PUBLIC_CHAT = "public_chat", "Public Chat"
+        ADMIN_ASSISTANT = "admin_assistant", "Admin Assistant"
+        SMART_SEARCH = "smart_search", "Smart Search"
+        CONTACT_ASSISTANT = "contact_assistant", "Contact Assistant"
+        CONTENT_SUMMARY = "content_summary", "Content Summary"
+
+    channel = models.CharField(max_length=40, choices=Channel.choices)
+    prompt = models.TextField()
+    response = models.TextField(blank=True)
+    provider = models.CharField(max_length=30, blank=True)
+    model = models.CharField(max_length=100, blank=True)
+    success = models.BooleanField(default=True)
+    error = models.TextField(blank=True)
+    session_key = models.CharField(max_length=80, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.get_channel_display()} - {self.created_at:%Y-%m-%d %H:%M}"
+
+
 class Skill(TimeStampedModel):
     class Level(models.TextChoices):
         BEGINNER = "Beginner", "Beginner"

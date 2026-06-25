@@ -1,8 +1,10 @@
 from itertools import chain
 import logging
+import json
 
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator
 from django.core.mail import EmailMessage
@@ -12,9 +14,12 @@ from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.dateparse import parse_date
+from django.views.decorators.http import require_POST
 
+from .ai import build_site_context, contact_assistance, content_context_for_model, run_ai
 from .forms import BlogCommentForm, CertificateVerificationForm, ContactForm, NewsletterSubscriptionForm
 from .models import (
+    AIInteraction,
     BlogPost,
     CareerTrack,
     Category,
@@ -513,6 +518,61 @@ def react_to_content(request):
 
     messages.success(request, "Reaction saved.")
     return redirect(request.POST.get("next") or getattr(obj, "get_absolute_url", lambda: reverse("home"))())
+
+
+@require_POST
+def ai_chat(request):
+    try:
+        data = json.loads(request.body.decode("utf-8") or "{}")
+    except json.JSONDecodeError:
+        data = request.POST
+    message = (data.get("message") or "").strip()
+    if not message:
+        return JsonResponse({"ok": False, "error": "Please enter a message."}, status=400)
+    if not request.session.session_key:
+        request.session.create()
+    context = build_site_context("", limit=24)
+    response = run_ai(message, context, AIInteraction.Channel.PUBLIC_CHAT, request.session.session_key)
+    return JsonResponse({"ok": response.success, "answer": response.text, "provider": response.provider})
+
+
+@require_POST
+def ai_smart_search(request):
+    query = (request.POST.get("q") or "").strip()
+    if not query:
+        return JsonResponse({"ok": False, "error": "Please enter a search question."}, status=400)
+    context = build_site_context(query, limit=24)
+    prompt = (
+        "Act as a smart search and recommendation agent. Recommend the most relevant site content, "
+        "grouped by type, with short reasons and suggested next clicks."
+    )
+    response = run_ai(f"{prompt}\n\nSearch question: {query}", context, AIInteraction.Channel.SMART_SEARCH, request.session.session_key or "")
+    return JsonResponse({"ok": response.success, "answer": response.text, "provider": response.provider})
+
+
+@staff_member_required
+def ai_admin_assistant(request):
+    result = ""
+    if request.method == "POST":
+        task = request.POST.get("task", "improve").strip()
+        model_name = request.POST.get("model_name", "").strip()
+        object_id = request.POST.get("object_id", "").strip()
+        notes = request.POST.get("notes", "").strip()
+        context = content_context_for_model(model_name, object_id) or build_site_context(notes, limit=12)
+        prompt = (
+            f"Admin content task: {task}. Help improve, draft, summarize, classify, or suggest SEO content. "
+            f"Return practical copy the admin can use.\n\nExtra notes: {notes}"
+        )
+        result = run_ai(prompt, context, AIInteraction.Channel.ADMIN_ASSISTANT, request.session.session_key or "").text
+    return render(request, "admin/ai_assistant.html", {"result": result})
+
+
+@staff_member_required
+@require_POST
+def ai_contact_assist(request, message_id):
+    message = get_object_or_404(ContactMessage, pk=message_id)
+    response = contact_assistance(message)
+    return JsonResponse({"ok": response.success, "answer": response.text, "provider": response.provider})
 
 
 def search_results(request):

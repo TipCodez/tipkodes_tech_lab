@@ -1,0 +1,51 @@
+{% extends "admin/base_site.html" %}
+{% block title %}AI Assistant | TIPKODES TECH LAB Admin{% endblock %}
+{% block content %}
+<div id="content-main">
+  <h1>AI Content Assistant</h1>
+  <p>Use this assistant to draft, improve, summarize, classify, or optimize portfolio content. It can use Groq, Gemini, or the local fallback based on your AI settings and environment variables.</p>
+  <form method="post" style="display:grid;gap:14px;max-width:900px;">
+    {% csrf_token %}
+    <div>
+      <label for="task"><strong>Task</strong></label>
+      <select id="task" name="task">
+        <option value="improve">Improve selected content</option>
+        <option value="draft_blog">Draft a blog post</option>
+        <option value="seo_titles">Suggest SEO titles</option>
+        <option value="summarize">Summarize content</option>
+        <option value="learning_path">Create a learning path</option>
+        <option value="finding_explainer">Explain a cybersecurity finding</option>
+        <option value="video_summary">Create video summary and key points</option>
+        <option value="reply">Draft a professional reply</option>
+      </select>
+    </div>
+    <div>
+      <label for="model_name"><strong>Content type</strong></label>
+      <select id="model_name" name="model_name">
+        <option value="">Use general site context</option>
+        <option value="project">Project</option>
+        <option value="blog">Blog</option>
+        <option value="finding">Cyber finding</option>
+        <option value="python">Python post</option>
+        <option value="cloud">Cloud post</option>
+        <option value="video">Video</option>
+        <option value="certificate">Certificate</option>
+        <option value="contact">Contact message</option>
+      </select>
+    </div>
+    <div>
+      <label for="object_id"><strong>Object ID</strong></label>
+      <input id="object_id" name="object_id" type="number" min="1" placeholder="Optional database ID" style="width:100%;max-width:260px;">
+    </div>
+    <div>
+      <label for="notes"><strong>Notes or instructions</strong></label>
+      <textarea id="notes" name="notes" rows="8" style="width:100%;" placeholder="Example: Rewrite this as a professional project description for recruiters."></textarea>
+    </div>
+    <button type="submit" class="button default">Generate</button>
+  </form>
+  {% if result %}
+    <h2>AI Result</h2>
+    <div style="white-space:pre-wrap;border:1px solid var(--hairline-color);padding:16px;border-radius:8px;background:var(--body-bg);">{{ result }}</div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -2,6 +2,8 @@ from django import forms
 from django.contrib import admin
 
 from .models import (
+    AIInteraction,
+    AISettings,
     BlogPost,
     BlogComment,
     CareerTrack,
@@ -27,12 +29,33 @@ from .models import (
     TimelineEvent,
     Video,
 )
+from .ai import contact_assistance
 
 
 admin.site.site_header = "TIPKODES TECH LAB Admin"
 admin.site.site_title = "TIPKODES TECH LAB"
 admin.site.index_title = "Content Management"
 admin.site.index_template = "admin/index.html"
+
+
+@admin.register(AISettings)
+class AISettingsAdmin(admin.ModelAdmin):
+    list_display = ("assistant_name", "provider", "is_enabled", "updated_at")
+    fieldsets = (
+        ("Status", {"fields": ("is_enabled", "provider", "assistant_name", "welcome_message")}),
+        ("Prompt", {"fields": ("system_prompt", "max_context_items")}),
+        ("Models", {"fields": ("groq_model", "gemini_model")}),
+        ("Dates", {"fields": ("created_at", "updated_at")}),
+    )
+    readonly_fields = ("created_at", "updated_at")
+
+
+@admin.register(AIInteraction)
+class AIInteractionAdmin(admin.ModelAdmin):
+    list_display = ("channel", "provider", "model", "success", "created_at")
+    list_filter = ("channel", "provider", "success", "created_at")
+    search_fields = ("prompt", "response", "error")
+    readonly_fields = ("channel", "prompt", "response", "provider", "model", "success", "error", "session_key", "created_at", "updated_at")
 
 
 class ProfileAdminForm(forms.ModelForm):
@@ -240,13 +263,22 @@ def mark_as_read(modeladmin, request, queryset):
     queryset.update(is_read=True)
 
 
+@admin.action(description="Generate AI assistance for selected messages")
+def generate_contact_assistance(modeladmin, request, queryset):
+    total = 0
+    for message in queryset[:10]:
+        contact_assistance(message)
+        total += 1
+    modeladmin.message_user(request, f"AI assistance generated for {total} contact message(s). Check AI interactions.")
+
+
 @admin.register(ContactMessage)
 class ContactMessageAdmin(admin.ModelAdmin):
     list_display = ("subject", "name", "email", "is_read", "created_at")
     list_filter = ("is_read", "created_at")
     search_fields = ("name", "email", "subject", "message")
     readonly_fields = ("name", "email", "subject", "message", "created_at", "updated_at")
-    actions = [mark_as_read]
+    actions = [mark_as_read, generate_contact_assistance]
 
 
 @admin.register(NewsletterSubscription)

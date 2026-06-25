@@ -32,6 +32,15 @@
     <span><strong>{{ analytics.total_page_views }}</strong> tracked page views</span>
     {% for path in analytics.popular_paths %}<span>{{ path.path }}: {{ path.total }}</span>{% endfor %}
   </div>
+  <section class="ai-search-panel">
+    <h2>AI Smart Search</h2>
+    <form id="aiSearchForm" data-search-url="{% url 'ai_smart_search' %}">
+      {% csrf_token %}
+      <input type="text" name="q" value="{{ query }}" placeholder="Ask for recommendations across the lab">
+      <button class="btn btn-lab" type="submit"><i class="bi bi-stars"></i> Ask AI</button>
+    </form>
+    <div class="ai-search-result" id="aiSearchResult" hidden></div>
+  </section>
   <div class="stack-list search-list">
     {% for row in items %}
       <a href="{{ row.url }}">

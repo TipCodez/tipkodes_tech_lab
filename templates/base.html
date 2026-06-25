@@ -116,6 +116,28 @@
     </div>
   </footer>
 
+  {% if not ai_settings or ai_settings.is_enabled %}
+    <section class="ai-chat-widget" id="aiChatWidget" aria-label="TIPKODES AI Assistant">
+      <button class="ai-chat-toggle" id="aiChatToggle" type="button" aria-label="Open AI assistant">
+        <i class="bi bi-stars"></i>
+      </button>
+      <div class="ai-chat-panel" id="aiChatPanel" hidden>
+        <div class="ai-chat-head">
+          <strong>{% if ai_settings %}{{ ai_settings.assistant_name }}{% else %}TIPKODES AI Assistant{% endif %}</strong>
+          <button type="button" id="aiChatClose" aria-label="Close AI assistant"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="ai-chat-log" id="aiChatLog">
+          <div class="ai-message ai-message-bot">{% if ai_settings %}{{ ai_settings.welcome_message }}{% else %}Ask me about projects, skills, cybersecurity, Python, cloud, videos, and certificates.{% endif %}</div>
+        </div>
+        <form class="ai-chat-form" id="aiChatForm" data-chat-url="{% url 'ai_chat' %}">
+          {% csrf_token %}
+          <input type="text" name="message" placeholder="Ask about the lab..." autocomplete="off" required>
+          <button type="submit" aria-label="Send"><i class="bi bi-send"></i></button>
+        </form>
+      </div>
+    </section>
+  {% endif %}
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="{% static 'js/main.js' %}"></script>
 </body>
