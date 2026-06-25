@@ -8,7 +8,7 @@ from django.core.paginator import Paginator
 from django.core.mail import EmailMessage
 from django.core.mail import get_connection
 from django.db.models import Count, Q
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.dateparse import parse_date
@@ -508,6 +508,9 @@ def react_to_content(request):
         session_key=request.session.session_key,
         defaults={"ip_address": get_client_ip(request)},
     )
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        return JsonResponse({"ok": True, "summary": get_reaction_summary(obj)})
+
     messages.success(request, "Reaction saved.")
     return redirect(request.POST.get("next") or getattr(obj, "get_absolute_url", lambda: reverse("home"))())
 

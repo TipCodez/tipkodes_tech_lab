@@ -85,4 +85,41 @@
     });
   }, { threshold: 0.4 });
   counters.forEach((counter) => counterObserver.observe(counter));
+
+  document.querySelectorAll(".reaction-panel").forEach((form) => {
+    form.addEventListener("submit", async (event) => {
+      const submitter = event.submitter;
+      if (!submitter || !window.fetch) return;
+
+      event.preventDefault();
+      const formData = new FormData(form);
+      formData.set(submitter.name, submitter.value);
+      submitter.disabled = true;
+
+      try {
+        const response = await fetch(form.action, {
+          method: "POST",
+          body: formData,
+          headers: { "X-Requested-With": "XMLHttpRequest" },
+        });
+        if (!response.ok) throw new Error("Reaction request failed");
+        const data = await response.json();
+        if (!data.summary) return;
+
+        Object.entries(data.summary).forEach(([reaction, total]) => {
+          const count = form.querySelector(`[data-reaction-count="${reaction}"]`);
+          if (count) count.textContent = total;
+        });
+      } catch (error) {
+        const fallback = document.createElement("input");
+        fallback.type = "hidden";
+        fallback.name = submitter.name;
+        fallback.value = submitter.value;
+        form.appendChild(fallback);
+        form.submit();
+      } finally {
+        submitter.disabled = false;
+      }
+    });
+  });
 })();
