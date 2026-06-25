@@ -1,7 +1,9 @@
 {% extends "base.html" %}
+{% load core_extras %}
 {% block title %}{{ post.seo_title|default:post.title }} | TIPKODES TECH LAB{% endblock %}
 {% block meta_description %}{{ post.meta_description|default:post.short_excerpt }}{% endblock %}
 {% block seo_meta %}
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css">
   {% if post.canonical_url %}<link rel="canonical" href="{{ post.canonical_url }}">{% endif %}
   <meta property="og:title" content="{{ post.seo_title|default:post.title }}">
   <meta property="og:description" content="{{ post.meta_description|default:post.short_excerpt }}">
@@ -9,6 +11,10 @@
   <meta property="og:url" content="{{ request.build_absolute_uri }}">
   {% if post.og_image %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ post.og_image.url }}">{% elif post.featured_image %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ post.featured_image.url }}">{% endif %}
   <meta name="twitter:card" content="summary_large_image">
+{% endblock %}
+{% block extra_scripts %}
+  <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/common.min.js"></script>
+  <script>document.querySelectorAll("pre code").forEach((block) => hljs.highlightElement(block));</script>
 {% endblock %}
 {% block content %}
 <section class="detail-hero">
@@ -41,7 +47,7 @@
       </aside>
     {% endif %}
 
-    <article class="article-body">{{ post.full_content|linebreaks }}</article>
+    <article class="article-body">{{ post.full_content|render_blog_content }}</article>
     {% include "reaction_panel.html" with reaction_model="blog" reaction_object=post reaction_summary=reaction_summary %}
 
     <div class="share-row blog-share">

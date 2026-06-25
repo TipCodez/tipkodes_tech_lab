@@ -569,6 +569,22 @@ h1, h2, h3 { letter-spacing: 0; }
   margin-bottom: 1.25rem;
 }
 .article-cover img { width: 100%; display: block; aspect-ratio: 16 / 8; object-fit: cover; }
+.article-body .code-block {
+  margin: 1.25rem 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: auto;
+  background: #0d1117;
+  box-shadow: var(--shadow);
+}
+.article-body .code-block code {
+  display: block;
+  min-width: 100%;
+  padding: 1rem;
+  font-size: 0.92rem;
+  line-height: 1.65;
+  white-space: pre;
+}
 .article-insight {
   margin-bottom: 1.25rem;
   padding: 1.25rem;

@@ -1,7 +1,8 @@
 from urllib.parse import urlencode
+import re
 
 from django import template
-from django.utils.html import conditional_escape
+from django.utils.html import conditional_escape, escape, linebreaks
 from django.utils.safestring import mark_safe
 
 from core.models import Reaction
@@ -42,6 +43,30 @@ def highlight(value, term, autoescape=True):
         return escaped
     end = start + len(needle)
     return mark_safe(f"{escaped[:start]}<mark>{escaped[start:end]}</mark>{escaped[end:]}")
+
+
+@register.filter
+def render_blog_content(value):
+    text = "" if value is None else str(value)
+    code_blocks = []
+
+    def stash_code(match):
+        language = (match.group(1) or "plaintext").strip().lower()
+        aliases = {"django": "django", "html": "xml", "shell": "bash", "sh": "bash", "py": "python"}
+        language = aliases.get(language, language)
+        code = escape(match.group(2).strip("\n"))
+        token = f"@@CODE_BLOCK_{len(code_blocks)}@@"
+        code_blocks.append(
+            f'<pre class="code-block"><code class="language-{escape(language)}">{code}</code></pre>'
+        )
+        return token
+
+    without_code = re.sub(r"```([A-Za-z0-9_-]+)?\n(.*?)```", stash_code, text, flags=re.DOTALL)
+    html = linebreaks(escape(without_code))
+    for index, block in enumerate(code_blocks):
+        html = html.replace(f"@@CODE_BLOCK_{index}@@", block)
+        html = html.replace(f"<p>{block}</p>", block)
+    return mark_safe(html)
 
 
 @register.simple_tag
