@@ -91,6 +91,69 @@ def _call_gemini(messages, settings):
     return AIResponse("".join(part.get("text", "") for part in parts).strip(), "gemini", model)
 
 
+def _clean_blog_topic(notes):
+    topic = " ".join((notes or "").strip().split())
+    lowered = topic.lower()
+    prefixes = [
+        "write a blog post about ",
+        "write blog post about ",
+        "draft a blog post about ",
+        "draft blog post about ",
+        "create a blog post about ",
+        "blog post about ",
+        "write about ",
+    ]
+    for prefix in prefixes:
+        if lowered.startswith(prefix):
+            topic = topic[len(prefix):].strip()
+            break
+    return topic.strip(" .") or "how I built TIPKODES TECH LAB"
+
+
+def _local_blog_draft(notes, context):
+    topic = _clean_blog_topic(notes)
+    title = topic[0].upper() + topic[1:] if topic else "How I Built TIPKODES TECH LAB"
+    project_context = "\n".join(line for line in context.splitlines() if line.startswith(("Profile:", "Project:", "Cloud:", "Skill:", "Resume summary:")))[:1200]
+    return (
+        f"Blog Title: How I Built TIPKODES TECH LAB with Django, Neon, Cloudinary, Render, and AI Agents\n\n"
+        "Short Excerpt:\n"
+        "A behind-the-scenes look at how TIPKODES TECH LAB was built as a full-stack Django portfolio platform with persistent database storage, media hosting, deployment on Render, and AI-powered assistants for visitors and admins.\n\n"
+        "Full Blog Draft:\n"
+        "How I Built TIPKODES TECH LAB with Django, Neon, Cloudinary, Render, and AI Agents\n\n"
+        "Introduction\n"
+        "TIPKODES TECH LAB started as more than a normal portfolio. I wanted a living technology lab where I could document projects, cybersecurity findings, Python learning, cloud work, videos, certificates, skills, and professional growth in one place. The goal was to build a platform that is useful for visitors, recruiters, collaborators, and for my own learning journey.\n\n"
+        "The Problem I Wanted to Solve\n"
+        "Many portfolios are static. They show a few links, but they do not grow easily. I wanted a system where the admin could update content dynamically without touching code. That meant projects, blog posts, findings, certificates, videos, gallery items, deployment notes, profile information, and social media links needed to be editable from the dashboard.\n\n"
+        "Backend with Django\n"
+        "I used Django because it gives a strong structure for building secure web applications quickly. The project uses Django models for content management, Django Admin for dashboard updates, URL routing for clean pages, templates for rendering the public site, and forms for contact messages, comments, newsletters, and reactions.\n\n"
+        "Persistent Database with Neon\n"
+        "For production data, I connected the project to Neon PostgreSQL. This makes the database persistent, so deployed content does not disappear when the Render service restarts or redeploys. Neon stores the important records: projects, posts, messages, profile data, AI settings, and site content.\n\n"
+        "Media Storage with Cloudinary\n"
+        "Uploaded files and images need durable storage too. Cloudinary handles media files such as profile photos, certificates, gallery images, project screenshots, and documents. This keeps uploaded files available even when the app is redeployed.\n\n"
+        "Deployment on Render\n"
+        "Render hosts the Django application. The deployment setup runs package installation, static file collection, migrations, and superuser creation. Environment variables are used for secrets, database URLs, email settings, Cloudinary credentials, and AI provider keys.\n\n"
+        "AI Agents in the Project\n"
+        "I added AI agents to make the platform more interactive and productive. The public assistant helps visitors ask about Raphael, projects, skills, findings, Python, cloud, videos, certificates, and contact options. The admin assistant helps generate blog drafts, improve content, summarize contact messages, suggest SEO titles, explain cybersecurity findings, and create learning paths. The system supports Groq, Gemini, and a local fallback when API keys are not available.\n\n"
+        "Security and Reliability Decisions\n"
+        "The project uses environment variables for sensitive settings, CSRF protection, secure production configuration, allowed hosts, trusted origins, and managed static/media handling. These choices make the project safer and easier to maintain in production.\n\n"
+        "What I Learned\n"
+        "- A portfolio becomes more powerful when it is dynamic and admin-managed.\n"
+        "- Persistent storage matters for real deployments.\n"
+        "- Cloud media storage prevents uploaded files from being lost.\n"
+        "- AI features are most useful when they are connected to real site data.\n"
+        "- Deployment is not only about going live; it is about keeping the app reliable after updates.\n\n"
+        "Conclusion\n"
+        "TIPKODES TECH LAB is now a growing full-stack portfolio and learning platform. It combines Django, Neon, Cloudinary, Render, and AI agents into one practical system for documenting technical growth and helping visitors understand my work.\n\n"
+        "SEO Title Ideas:\n"
+        "- How I Built TIPKODES TECH LAB with Django, Neon, Cloudinary, Render, and AI Agents\n"
+        "- Building a Dynamic Django Portfolio with AI Agents\n"
+        "- From Portfolio to Tech Lab: My Django, Cloudinary, Neon, and Render Journey\n\n"
+        "Suggested Tags: Django, Python, Neon, Cloudinary, Render, AI Agents, Portfolio, PostgreSQL, Deployment\n\n"
+        f"Admin Notes Used:\n{title}\n\n"
+        f"Site Context Used:\n{project_context}"
+    )
+
+
 def _local_response(question, context):
     lines = [line.strip() for line in context.splitlines() if line.strip()]
     normalized = " ".join(question.lower().strip().split())
@@ -99,40 +162,8 @@ def _local_response(question, context):
     if "admin content task:" in normalized:
         notes = question.split("Extra notes:", 1)[-1].strip() if "Extra notes:" in question else question
         source = context.strip() or notes or "TIPKODES TECH LAB portfolio content"
-        if "draft_blog" in normalized or "draft a blog" in normalized:
-            title = notes.splitlines()[0].strip(" .") if notes else "Building with TIPKODES TECH LAB"
-            if len(title) > 90:
-                title = title[:87].rstrip() + "..."
-            return AIResponse(
-                (
-                    f"Blog Title: {title}\n\n"
-                    "Short Excerpt:\n"
-                    f"A practical look at {title.lower()}, with lessons from TIPKODES TECH LAB and clear takeaways for learners, developers, and collaborators.\n\n"
-                    "Full Blog Draft:\n"
-                    f"{title}\n\n"
-                    "Introduction\n"
-                    "Technology growth becomes stronger when learning is documented through real projects, clear explanations, and practical reflection. "
-                    "This post shares the idea, process, and value behind the topic so readers can understand both the technical direction and the learning journey.\n\n"
-                    "Context\n"
-                    f"{source[:900]}\n\n"
-                    "Key Lessons\n"
-                    "- Start with the problem being solved before listing tools.\n"
-                    "- Explain the technical decisions in simple language.\n"
-                    "- Highlight security, reliability, and deployment considerations.\n"
-                    "- Connect the work to real learning outcomes and next steps.\n\n"
-                    "Practical Takeaways\n"
-                    "Readers should leave with a clear understanding of what was built or learned, why it matters, and how the same approach can be applied to future projects.\n\n"
-                    "Conclusion\n"
-                    "TIPKODES TECH LAB is a living portfolio for learning, building, teaching, and improving. Each post, project, and lab note adds evidence of growth and creates a useful reference for others.\n\n"
-                    "SEO Title Ideas:\n"
-                    f"- {title} | TIPKODES TECH LAB\n"
-                    f"- What I Learned from {title}\n"
-                    f"- Practical Tech Notes: {title}\n\n"
-                    "Suggested Tags: Django, Python, Cybersecurity, Cloud, Portfolio, Learning"
-                ),
-                "local",
-                "admin-draft-fallback",
-            )
+        if "draft_blog" in normalized or "draft a blog" in normalized or "write a blog" in normalized or "blog post" in normalized:
+            return AIResponse(_local_blog_draft(notes, context), "local", "admin-draft-fallback")
         if "seo_titles" in normalized:
             return AIResponse(
                 (
