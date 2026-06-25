@@ -123,6 +123,22 @@
     align-items: center;
     margin-top: 16px;
   }
+  .ai-checks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 14px;
+  }
+  .ai-checks label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 1px solid var(--hairline-color);
+    border-radius: 8px;
+    background: rgba(0, 212, 255, .05);
+    font-weight: 800;
+  }
   .ai-submit-row .button {
     padding: 11px 18px;
     border-radius: 8px;
@@ -252,6 +268,10 @@
             <textarea id="notes" name="notes" placeholder="Example: Rewrite this as a professional project description for recruiters."></textarea>
           </div>
         </div>
+        <div class="ai-checks">
+          <label><input type="checkbox" name="use_internet" checked> Research the internet for blog/content tasks</label>
+          <label><input type="checkbox" name="save_blog"> Save result as draft blog post</label>
+        </div>
         <div class="ai-submit-row">
           <button type="submit" class="button default">Generate with AI</button>
           <p class="ai-hint">Use an Object ID to ground the answer in a specific project, blog, finding, video, certificate, or contact message.</p>
@@ -280,6 +300,9 @@
         <h2>AI Result</h2>
         <span class="ai-provider-pill">Ready to review</span>
       </div>
+      {% if saved_blog %}
+        <p class="ai-hint">Saved as draft blog: <a href="{% url 'admin:core_blogpost_change' saved_blog.id %}">{{ saved_blog.title }}</a></p>
+      {% endif %}
       <div class="ai-result">{{ result }}</div>
     </section>
   {% endif %}

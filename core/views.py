@@ -16,7 +16,7 @@ from django.urls import reverse
 from django.utils.dateparse import parse_date
 from django.views.decorators.http import require_POST
 
-from .ai import build_site_context, contact_assistance, content_context_for_model, run_ai
+from .ai import build_site_context, contact_assistance, content_context_for_model, extract_blog_fields, internet_research_context, run_ai
 from .forms import BlogCommentForm, CertificateVerificationForm, ContactForm, NewsletterSubscriptionForm
 from .models import (
     AIInteraction,
@@ -553,18 +553,34 @@ def ai_smart_search(request):
 @staff_member_required
 def ai_admin_assistant(request):
     result = ""
+    saved_blog = None
     if request.method == "POST":
         task = request.POST.get("task", "improve").strip()
         model_name = request.POST.get("model_name", "").strip()
         object_id = request.POST.get("object_id", "").strip()
         notes = request.POST.get("notes", "").strip()
+        use_internet = request.POST.get("use_internet") == "on"
+        save_blog = request.POST.get("save_blog") == "on"
         context = content_context_for_model(model_name, object_id) or build_site_context(notes, limit=12)
+        if use_internet or "blog" in task or "blog" in notes.lower():
+            context = f"{context}\n\n{internet_research_context(notes)}"
         prompt = (
             f"Admin content task: {task}. Help improve, draft, summarize, classify, or suggest SEO content. "
+            "If asked for a blog post, write a polished professional blog with a clear title, short excerpt, full blog draft, SEO title ideas, suggested tags, and source notes when internet research is available. "
             f"Return practical copy the admin can use.\n\nExtra notes: {notes}"
         )
         result = run_ai(prompt, context, AIInteraction.Channel.ADMIN_ASSISTANT, request.session.session_key or "").text
-    return render(request, "admin/ai_assistant.html", {"result": result})
+        if save_blog:
+            fields = extract_blog_fields(result)
+            saved_blog = BlogPost.objects.create(
+                title=fields["title"],
+                short_excerpt=fields["short_excerpt"],
+                full_content=fields["full_content"],
+                status=BlogPost.Status.DRAFT,
+                author=getattr(request.user, "get_full_name", lambda: "")() or request.user.username or "TIPKODES",
+            )
+            messages.success(request, f"Draft blog post saved: {saved_blog.title}")
+    return render(request, "admin/ai_assistant.html", {"result": result, "saved_blog": saved_blog})
 
 
 @staff_member_required

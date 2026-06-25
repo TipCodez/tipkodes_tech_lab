@@ -1,5 +1,6 @@
 import json
 import os
+import re
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
@@ -43,6 +44,91 @@ def _request_json(url, payload, headers, timeout=25):
     request = Request(url, data=json.dumps(payload).encode("utf-8"), headers=headers, method="POST")
     with urlopen(request, timeout=timeout) as response:
         return json.loads(response.read().decode("utf-8"))
+
+
+def _research_with_tavily(query):
+    api_key = os.environ.get("TAVILY_API_KEY", "").strip()
+    if not api_key:
+        return []
+    data = _request_json(
+        "https://api.tavily.com/search",
+        {"api_key": api_key, "query": query, "search_depth": "basic", "max_results": 5},
+        {"Content-Type": "application/json"},
+        timeout=20,
+    )
+    return [
+        {
+            "title": item.get("title", ""),
+            "url": item.get("url", ""),
+            "snippet": item.get("content", ""),
+        }
+        for item in data.get("results", [])
+    ]
+
+
+def _research_with_serper(query):
+    api_key = os.environ.get("SERPER_API_KEY", "").strip()
+    if not api_key:
+        return []
+    data = _request_json(
+        "https://google.serper.dev/search",
+        {"q": query, "num": 5},
+        {"Content-Type": "application/json", "X-API-KEY": api_key},
+        timeout=20,
+    )
+    return [
+        {
+            "title": item.get("title", ""),
+            "url": item.get("link", ""),
+            "snippet": item.get("snippet", ""),
+        }
+        for item in data.get("organic", [])
+    ]
+
+
+def internet_research_context(query):
+    if not query:
+        return "Internet Research: No query provided."
+    errors = []
+    results = []
+    for researcher in (_research_with_tavily, _research_with_serper):
+        try:
+            results = researcher(query)
+            if results:
+                break
+        except (HTTPError, URLError, TimeoutError, RuntimeError, KeyError, json.JSONDecodeError) as exc:
+            errors.append(str(exc))
+    if not results:
+        if errors:
+            return "Internet Research: Search provider failed. " + " | ".join(errors[:2])
+        return "Internet Research: No search API key configured. Add TAVILY_API_KEY or SERPER_API_KEY to enable live web research."
+    lines = ["Internet Research:"]
+    for index, item in enumerate(results, 1):
+        lines.append(f"{index}. {item['title']} - {item['url']}\n   {item['snippet']}")
+    return "\n".join(lines)
+
+
+def extract_blog_fields(text):
+    def section(name, next_names):
+        pattern = rf"{re.escape(name)}:\s*(.*?)(?=\n(?:{'|'.join(re.escape(item) for item in next_names)}):|\Z)"
+        match = re.search(pattern, text, flags=re.IGNORECASE | re.DOTALL)
+        return match.group(1).strip() if match else ""
+
+    title = section("Blog Title", ["Short Excerpt", "Full Blog Draft", "SEO Title Ideas", "Suggested Tags"])
+    excerpt = section("Short Excerpt", ["Full Blog Draft", "SEO Title Ideas", "Suggested Tags"])
+    full_content = section("Full Blog Draft", ["SEO Title Ideas", "Suggested Tags", "Admin Notes Used", "Site Context Used"])
+    if not title:
+        first_line = next((line.strip() for line in text.splitlines() if line.strip()), "AI Generated Blog")
+        title = first_line.replace("Blog Title:", "").strip()
+    if not excerpt:
+        excerpt = "AI-generated blog draft for TIPKODES TECH LAB."
+    if not full_content:
+        full_content = text
+    return {
+        "title": title[:220],
+        "short_excerpt": excerpt[:320],
+        "full_content": full_content.strip(),
+    }
 
 
 def _call_groq(messages, settings):
