@@ -147,6 +147,13 @@ class BlogPostAdmin(admin.ModelAdmin):
     filter_horizontal = ("tags",)
     readonly_fields = ("created_at", "updated_at")
     actions = ["publish_posts", "draft_posts", "archive_posts"]
+    fieldsets = (
+        ("Core Article", {"fields": ("title", "slug", "author", "category", "tags", "featured_image", "short_excerpt", "full_content")}),
+        ("AI Enhancements", {"fields": ("ai_summary", "ai_key_takeaways")}),
+        ("SEO and Sharing", {"fields": ("seo_title", "meta_description", "canonical_url", "og_image")}),
+        ("Publishing", {"fields": ("reading_time", "status", "published_date", "featured")}),
+        ("Dates", {"fields": ("created_at", "updated_at")}),
+    )
 
     @admin.action(description="Publish selected blog posts")
     def publish_posts(self, request, queryset):

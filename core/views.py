@@ -37,6 +37,7 @@ from .models import (
     Reaction,
     Resume,
     Skill,
+    Tag,
     Testimonial,
     TimelineEvent,
     Video,
@@ -292,7 +293,17 @@ def blog(request):
         qs = qs.filter(Q(title__icontains=q) | Q(short_excerpt__icontains=q) | Q(full_content__icontains=q))
     if tag:
         qs = qs.filter(tags__slug=tag)
-    return render(request, "blog.html", {"items": paginate(request, qs.distinct()), "categories": Category.objects.filter(category_type=Category.CategoryType.BLOG)})
+    featured_posts = BlogPost.objects.filter(status=BlogPost.Status.PUBLISHED, featured=True).select_related("category").prefetch_related("tags")[:3]
+    return render(
+        request,
+        "blog.html",
+        {
+            "items": paginate(request, qs.distinct()),
+            "categories": Category.objects.filter(category_type=Category.CategoryType.BLOG),
+            "tags": Tag.objects.filter(blogpost__status=BlogPost.Status.PUBLISHED).distinct().order_by("name")[:24],
+            "featured_posts": featured_posts,
+        },
+    )
 
 
 def blog_detail(request, slug):
@@ -304,13 +315,19 @@ def blog_detail(request, slug):
         comment.save()
         messages.success(request, "Your comment was submitted and is waiting for approval.")
         return redirect(post.get_absolute_url())
-    related = BlogPost.objects.filter(status=BlogPost.Status.PUBLISHED, category=post.category).exclude(pk=post.pk)[:3]
+    related = BlogPost.objects.filter(status=BlogPost.Status.PUBLISHED).exclude(pk=post.pk)
+    if post.category_id:
+        related = related.filter(Q(category=post.category) | Q(tags__in=post.tags.all()))
+    else:
+        related = related.filter(tags__in=post.tags.all())
+    related = related.distinct().select_related("category").prefetch_related("tags")[:3]
     return render(
         request,
         "blog_detail.html",
         {
             "post": post,
             "related_posts": related,
+            "author_profile": Profile.objects.order_by("-updated_at").first(),
             "comment_form": comment_form,
             "comments": post.comments.filter(is_approved=True),
             "reaction_summary": get_reaction_summary(post),
@@ -572,13 +589,26 @@ def ai_admin_assistant(request):
         result = run_ai(prompt, context, AIInteraction.Channel.ADMIN_ASSISTANT, request.session.session_key or "").text
         if save_blog:
             fields = extract_blog_fields(result)
+            category, _ = Category.objects.get_or_create(
+                name="AI Drafts",
+                category_type=Category.CategoryType.BLOG,
+                defaults={"description": "AI-assisted blog drafts awaiting review."},
+            )
             saved_blog = BlogPost.objects.create(
                 title=fields["title"],
+                category=category,
                 short_excerpt=fields["short_excerpt"],
                 full_content=fields["full_content"],
+                ai_summary=fields["ai_summary"],
+                ai_key_takeaways=fields["ai_key_takeaways"],
+                seo_title=fields["seo_title"],
+                meta_description=fields["meta_description"],
                 status=BlogPost.Status.DRAFT,
                 author=getattr(request.user, "get_full_name", lambda: "")() or request.user.username or "TIPKODES",
             )
+            for tag_name in fields["tags"]:
+                tag, _ = Tag.objects.get_or_create(name=tag_name)
+                saved_blog.tags.add(tag)
             messages.success(request, f"Draft blog post saved: {saved_blog.title}")
     return render(request, "admin/ai_assistant.html", {"result": result, "saved_blog": saved_blog})
 

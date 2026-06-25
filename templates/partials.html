@@ -15,9 +15,10 @@
 <article class="lab-card h-100 reveal">
   <div class="media-frame">{% if item.featured_image %}<img src="{{ item.featured_image.url }}" alt="{{ item.title }}">{% else %}<div class="placeholder-visual"><i class="bi bi-journal-code"></i></div>{% endif %}</div>
   <div class="card-body">
-    <div class="meta-row"><span>{{ item.category.name|default:"Blog" }}</span><span>{{ item.reading_time }} min read</span></div>
+    <div class="meta-row"><span>{{ item.category.name|default:"Blog" }}</span><span>{{ item.published_date|date:"M d, Y" }}</span></div>
     <h3>{{ item.title }}</h3>
     <p>{{ item.short_excerpt }}</p>
+    <div class="chip-row">{% for tag in item.tags.all|slice:":3" %}<span>#{{ tag.name }}</span>{% empty %}<span>{{ item.reading_time }} min read</span>{% endfor %}</div>
     <a class="card-link" href="{{ item.get_absolute_url }}">Read article <i class="bi bi-arrow-right"></i></a>
   </div>
 </article>

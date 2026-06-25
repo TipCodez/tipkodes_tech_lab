@@ -117,6 +117,8 @@ def extract_blog_fields(text):
     title = section("Blog Title", ["Short Excerpt", "Full Blog Draft", "SEO Title Ideas", "Suggested Tags"])
     excerpt = section("Short Excerpt", ["Full Blog Draft", "SEO Title Ideas", "Suggested Tags"])
     full_content = section("Full Blog Draft", ["SEO Title Ideas", "Suggested Tags", "Admin Notes Used", "Site Context Used"])
+    seo_titles = section("SEO Title Ideas", ["Suggested Tags", "Admin Notes Used", "Site Context Used"])
+    tags = section("Suggested Tags", ["Admin Notes Used", "Site Context Used"])
     if not title:
         first_line = next((line.strip() for line in text.splitlines() if line.strip()), "AI Generated Blog")
         title = first_line.replace("Blog Title:", "").strip()
@@ -128,6 +130,11 @@ def extract_blog_fields(text):
         "title": title[:220],
         "short_excerpt": excerpt[:320],
         "full_content": full_content.strip(),
+        "ai_summary": excerpt[:1000],
+        "ai_key_takeaways": "\n".join(line.strip("- ").strip() for line in full_content.splitlines() if line.strip().startswith("- "))[:1500],
+        "seo_title": (seo_titles.splitlines()[0].strip("- ").strip() if seo_titles else title)[:180],
+        "meta_description": excerpt[:320],
+        "tags": [tag.strip() for tag in tags.replace("\n", ",").split(",") if tag.strip()][:8],
     }
 
 
