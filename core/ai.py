@@ -96,6 +96,73 @@ def _local_response(question, context):
     normalized = " ".join(question.lower().strip().split())
     words = [word.lower().strip(".,:;!?()[]") for word in question.split() if len(word) > 2]
 
+    if "admin content task:" in normalized:
+        notes = question.split("Extra notes:", 1)[-1].strip() if "Extra notes:" in question else question
+        source = context.strip() or notes or "TIPKODES TECH LAB portfolio content"
+        if "draft_blog" in normalized or "draft a blog" in normalized:
+            title = notes.splitlines()[0].strip(" .") if notes else "Building with TIPKODES TECH LAB"
+            if len(title) > 90:
+                title = title[:87].rstrip() + "..."
+            return AIResponse(
+                (
+                    f"Blog Title: {title}\n\n"
+                    "Short Excerpt:\n"
+                    f"A practical look at {title.lower()}, with lessons from TIPKODES TECH LAB and clear takeaways for learners, developers, and collaborators.\n\n"
+                    "Full Blog Draft:\n"
+                    f"{title}\n\n"
+                    "Introduction\n"
+                    "Technology growth becomes stronger when learning is documented through real projects, clear explanations, and practical reflection. "
+                    "This post shares the idea, process, and value behind the topic so readers can understand both the technical direction and the learning journey.\n\n"
+                    "Context\n"
+                    f"{source[:900]}\n\n"
+                    "Key Lessons\n"
+                    "- Start with the problem being solved before listing tools.\n"
+                    "- Explain the technical decisions in simple language.\n"
+                    "- Highlight security, reliability, and deployment considerations.\n"
+                    "- Connect the work to real learning outcomes and next steps.\n\n"
+                    "Practical Takeaways\n"
+                    "Readers should leave with a clear understanding of what was built or learned, why it matters, and how the same approach can be applied to future projects.\n\n"
+                    "Conclusion\n"
+                    "TIPKODES TECH LAB is a living portfolio for learning, building, teaching, and improving. Each post, project, and lab note adds evidence of growth and creates a useful reference for others.\n\n"
+                    "SEO Title Ideas:\n"
+                    f"- {title} | TIPKODES TECH LAB\n"
+                    f"- What I Learned from {title}\n"
+                    f"- Practical Tech Notes: {title}\n\n"
+                    "Suggested Tags: Django, Python, Cybersecurity, Cloud, Portfolio, Learning"
+                ),
+                "local",
+                "admin-draft-fallback",
+            )
+        if "seo_titles" in normalized:
+            return AIResponse(
+                (
+                    "SEO Title Suggestions:\n"
+                    f"- {notes or 'TIPKODES TECH LAB Project'}: Practical Lessons and Key Takeaways\n"
+                    f"- How {notes or 'This Project'} Shows Real Technical Growth\n"
+                    f"- Building, Learning, and Documenting {notes or 'Technology Projects'}\n\n"
+                    "Meta Description:\n"
+                    "Explore a practical TIPKODES TECH LAB entry covering the problem, tools, lessons learned, and next steps."
+                ),
+                "local",
+                "admin-draft-fallback",
+            )
+        if "summarize" in normalized or "summary" in normalized:
+            return AIResponse(
+                f"Summary:\n{source[:1200]}\n\nKey Points:\n- Main idea documented for portfolio visitors.\n- Useful for learning evidence and professional presentation.\n- Can be improved with screenshots, links, tags, and next steps.",
+                "local",
+                "admin-draft-fallback",
+            )
+        return AIResponse(
+            (
+                "AI Draft:\n"
+                f"{source[:1200]}\n\n"
+                "Suggested Improvement:\n"
+                "Rewrite the content with a clear problem statement, tools used, implementation details, lessons learned, and next steps."
+            ),
+            "local",
+            "admin-draft-fallback",
+        )
+
     greetings = {"hi", "hello", "hey", "good morning", "good afternoon", "good evening"}
     if normalized in greetings or normalized.startswith(("hi ", "hello ", "hey ")):
         return AIResponse(
