@@ -54,18 +54,20 @@ def render_blog_content(value):
         language = (match.group(1) or "plaintext").strip().lower()
         aliases = {"django": "django", "html": "xml", "shell": "bash", "sh": "bash", "py": "python"}
         language = aliases.get(language, language)
-        code = escape(match.group(2).strip("\n"))
+        code = escape(match.group(2).strip("\r\n"))
         token = f"@@CODE_BLOCK_{len(code_blocks)}@@"
         code_blocks.append(
             f'<pre class="code-block"><code class="language-{escape(language)}">{code}</code></pre>'
         )
         return token
 
-    without_code = re.sub(r"```([A-Za-z0-9_-]+)?\n(.*?)```", stash_code, text, flags=re.DOTALL)
+    fence_pattern = r"```[ \t]*([A-Za-z0-9_-]+)?[ \t]*(?:\r?\n)(.*?)(?:\r?\n)?```"
+    without_code = re.sub(fence_pattern, stash_code, text, flags=re.DOTALL)
     html = linebreaks(escape(without_code))
     for index, block in enumerate(code_blocks):
-        html = html.replace(f"@@CODE_BLOCK_{index}@@", block)
-        html = html.replace(f"<p>{block}</p>", block)
+        token = f"@@CODE_BLOCK_{index}@@"
+        html = html.replace(f"<p>{token}</p>", block)
+        html = html.replace(token, block)
     return mark_safe(html)
 
 
