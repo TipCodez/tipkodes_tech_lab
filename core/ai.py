@@ -93,7 +93,50 @@ def _call_gemini(messages, settings):
 
 def _local_response(question, context):
     lines = [line.strip() for line in context.splitlines() if line.strip()]
+    normalized = " ".join(question.lower().strip().split())
     words = [word.lower().strip(".,:;!?()[]") for word in question.split() if len(word) > 2]
+
+    greetings = {"hi", "hello", "hey", "good morning", "good afternoon", "good evening"}
+    if normalized in greetings or normalized.startswith(("hi ", "hello ", "hey ")):
+        return AIResponse(
+            "Hello, welcome to TIPKODES TECH LAB. I can help you explore Raphael's projects, skills, cybersecurity findings, Python work, cloud content, videos, certificates, resume, or contact details. What would you like to see?",
+            "local",
+            "conversational-fallback",
+        )
+
+    if any(phrase in normalized for phrase in ["who are you", "what can you do", "help", "how can you help"]):
+        return AIResponse(
+            "I am the TIPKODES AI Assistant. I can guide visitors through the portfolio, recommend relevant projects or posts, explain cybersecurity findings, summarize videos and certificates, and point people to contact details when they want to connect.",
+            "local",
+            "conversational-fallback",
+        )
+
+    if any(phrase in normalized for phrase in ["contact", "email", "reach", "message", "connect"]):
+        contact_lines = [line for line in lines if line.lower().startswith("contact:")]
+        if contact_lines:
+            return AIResponse(f"You can connect through the contact page. {contact_lines[0]}", "local", "conversational-fallback")
+        return AIResponse("You can use the contact page to send Raphael a message directly.", "local", "conversational-fallback")
+
+    topic_map = {
+        "project": ("Project:", "Here are some projects from TIPKODES TECH LAB:"),
+        "skill": ("Skill:", "Here are some skills listed on the site:"),
+        "cyber": ("Cyber finding:", "Here are cybersecurity findings or notes from the lab:"),
+        "finding": ("Cyber finding:", "Here are cybersecurity findings or notes from the lab:"),
+        "python": ("Python:", "Here are Python-related entries:"),
+        "cloud": ("Cloud:", "Here are cloud computing entries:"),
+        "video": ("Video:", "Here are videos from the lab:"),
+        "certificate": ("Certificate:", "Here are certificates listed on the site:"),
+        "resume": ("Resume summary:", "Here is the resume summary:"),
+        "about": ("Profile:", "Here is Raphael's profile summary:"),
+        "raphael": ("Profile:", "Here is Raphael's profile summary:"),
+    }
+    for keyword, (prefix, intro) in topic_map.items():
+        if keyword in normalized:
+            topic_lines = [line for line in lines if line.startswith(prefix)]
+            if topic_lines:
+                answer = "\n".join(f"- {line}" for line in topic_lines[:6])
+                return AIResponse(f"{intro}\n{answer}", "local", "conversational-fallback")
+
     matches = []
     for line in lines:
         score = sum(1 for word in words if word in line.lower())
