@@ -186,7 +186,8 @@ class BlogPostAdmin(admin.ModelAdmin):
         if db_field.name == "full_content":
             formfield.help_text = (
                 "Formatting: use ## Section title, ### Subtitle, #### Small heading. "
-                "Use fenced code blocks, :::output, :::screenshot, and :::link blocks for technical posts."
+                "Use fenced code blocks, :::output, :::screenshot, :::image, and :::link blocks. "
+                "Use pipe tables like | Feature | Status | with a separator row |---|---|."
             )
         return formfield
 

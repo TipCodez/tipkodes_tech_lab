@@ -50,6 +50,13 @@ def render_blog_content(value):
     text = "" if value is None else str(value)
     special_blocks = []
 
+    def is_safe_absolute_url(raw_url):
+        parsed = urlparse(raw_url)
+        return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
+
+    def is_safe_media_url(raw_url):
+        return is_safe_absolute_url(raw_url) or (raw_url.startswith("/") and not raw_url.startswith("//"))
+
     def stash_code(match):
         language = (match.group(1) or "plaintext").strip().lower()
         aliases = {"django": "django", "html": "xml", "shell": "bash", "sh": "bash", "py": "python"}
@@ -109,7 +116,7 @@ def render_blog_content(value):
                 continue
             key, separator, value = line.partition(":")
             normalized_key = key.strip().lower()
-            if separator and normalized_key in {"url", "title", "description", "label"}:
+            if separator and normalized_key in {"url", "title", "description", "label", "alt", "caption", "size"}:
                 data[normalized_key] = value.strip()
             else:
                 plain_lines.append(line)
@@ -124,10 +131,9 @@ def render_blog_content(value):
     def stash_link(match):
         data = parse_embed_lines(match.group(1).strip())
         raw_url = data.get("url", "")
-        parsed = urlparse(raw_url)
-        if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+        if not is_safe_absolute_url(raw_url):
             return ""
-        title = data.get("title") or parsed.netloc
+        title = data.get("title") or urlparse(raw_url).netloc
         description = data.get("description") or raw_url
         label = data.get("label") or "Open resource"
         token = f"@@SPECIAL_BLOCK_{len(special_blocks)}@@"
@@ -144,6 +150,27 @@ def render_blog_content(value):
         return token
 
     without_code = re.sub(r":::[ \t]*link[ \t]*(?:\r?\n)(.*?)(?:\r?\n)?:::", stash_link, without_code, flags=re.DOTALL | re.IGNORECASE)
+
+    def stash_image(match):
+        data = parse_embed_lines(match.group(1).strip())
+        raw_url = data.get("url", "")
+        if not is_safe_media_url(raw_url):
+            return ""
+        caption = data.get("caption") or data.get("title") or ""
+        alt = data.get("alt") or caption or "Blog image"
+        size = (data.get("size") or "wide").lower()
+        size_class = "is-compact" if size == "compact" else "is-full" if size == "full" else "is-wide"
+        caption_html = f'<figcaption>{escape(caption)}</figcaption>' if caption else ""
+        token = f"@@SPECIAL_BLOCK_{len(special_blocks)}@@"
+        special_blocks.append(
+            f'<figure class="blog-content-image {size_class}">'
+            f'<img src="{escape(raw_url)}" alt="{escape(alt)}">'
+            f"{caption_html}"
+            '</figure>'
+        )
+        return token
+
+    without_code = re.sub(r":::[ \t]*image[ \t]*(?:\r?\n)(.*?)(?:\r?\n)?:::", stash_image, without_code, flags=re.DOTALL | re.IGNORECASE)
 
     def stash_heading(match):
         marks = match.group(1)
@@ -169,6 +196,56 @@ def render_blog_content(value):
         return token
 
     without_code = re.sub(r"(?m)^[ \t]*(#{1,4})[ \t]+(.+?)[ \t]*$", stash_heading, without_code)
+
+    def split_table_row(row):
+        cleaned = row.strip()
+        if cleaned.startswith("|"):
+            cleaned = cleaned[1:]
+        if cleaned.endswith("|"):
+            cleaned = cleaned[:-1]
+        return [cell.strip() for cell in cleaned.split("|")]
+
+    def is_table_separator(row):
+        cells = split_table_row(row)
+        return bool(cells) and all(re.fullmatch(r":?-{3,}:?", cell.replace(" ", "")) for cell in cells)
+
+    def stash_tables(content):
+        lines = content.splitlines()
+        rendered = []
+        index = 0
+        while index < len(lines):
+            line = lines[index]
+            if "|" not in line or index + 1 >= len(lines) or not is_table_separator(lines[index + 1]):
+                rendered.append(line)
+                index += 1
+                continue
+
+            header = split_table_row(line)
+            rows = []
+            index += 2
+            while index < len(lines) and "|" in lines[index] and lines[index].strip():
+                rows.append(split_table_row(lines[index]))
+                index += 1
+
+            token = f"@@SPECIAL_BLOCK_{len(special_blocks)}@@"
+            head_html = "".join(f"<th>{escape(cell)}</th>" for cell in header)
+            body_rows = []
+            for row in rows:
+                normalized = row + [""] * (len(header) - len(row))
+                cells = "".join(f"<td>{escape(cell)}</td>" for cell in normalized[: len(header)])
+                body_rows.append(f"<tr>{cells}</tr>")
+            special_blocks.append(
+                '<div class="blog-table-wrap">'
+                '<table class="blog-custom-table">'
+                f"<thead><tr>{head_html}</tr></thead>"
+                f"<tbody>{''.join(body_rows)}</tbody>"
+                '</table>'
+                '</div>'
+            )
+            rendered.append(token)
+        return "\n".join(rendered)
+
+    without_code = stash_tables(without_code)
 
     html = linebreaks(escape(without_code))
     for index, block in enumerate(special_blocks):
