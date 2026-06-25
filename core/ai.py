@@ -104,6 +104,14 @@ def _local_response(question, context):
             "conversational-fallback",
         )
 
+    correction_phrases = ["wrong", "not correct", "incorrect", "no that", "nope", "that is not", "that's not"]
+    if any(phrase in normalized for phrase in correction_phrases):
+        return AIResponse(
+            "Thanks for correcting me. Tell me what you want me to focus on, for example: projects Raphael has built, Python work, cybersecurity findings, cloud content, videos, certificates, skills, or contact details.",
+            "local",
+            "conversational-fallback",
+        )
+
     if any(phrase in normalized for phrase in ["who are you", "what can you do", "help", "how can you help"]):
         return AIResponse(
             "I am the TIPKODES AI Assistant. I can guide visitors through the portfolio, recommend relevant projects or posts, explain cybersecurity findings, summarize videos and certificates, and point people to contact details when they want to connect.",
@@ -130,6 +138,26 @@ def _local_response(question, context):
         "about": ("Profile:", "Here is Raphael's profile summary:"),
         "raphael": ("Profile:", "Here is Raphael's profile summary:"),
     }
+    project_intent = (
+        "project" in normalized
+        or "projects" in normalized
+        or "built" in normalized
+        or "build" in normalized
+        or "created" in normalized
+        or "developed" in normalized
+        or "portfolio platform" in normalized
+    )
+    if project_intent:
+        project_lines = [line for line in lines if line.startswith("Project:")]
+        if project_lines:
+            answer = "\n".join(f"- {line}" for line in project_lines[:6])
+            return AIResponse(f"Here are projects Raphael has built or documented on TIPKODES TECH LAB:\n{answer}", "local", "conversational-fallback")
+        return AIResponse(
+            "I do not see project records available in the site context yet. Once projects are added in Admin, I can list them here with their descriptions, technologies, and status.",
+            "local",
+            "conversational-fallback",
+        )
+
     for keyword, (prefix, intro) in topic_map.items():
         if keyword in normalized:
             topic_lines = [line for line in lines if line.startswith(prefix)]
